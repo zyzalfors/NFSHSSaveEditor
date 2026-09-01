@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include "NFSHSSave.h"
 
+#define PRINT_HELP "-help"
 #define PRINT_CMD "-print"
 #define FIX_CMD "-fix"
 #define SET_LANGUAGE_CMD "-lang"
@@ -14,8 +15,29 @@
 #define SET_MONEY_CMD "-money"
 #define SET_GOLD_TROPHIES_CMD "-trophies"
 
+void printhelp() {
+    printf(
+        "Usage: NFSHSaveEditor <command>\n"
+        "Commands:\n"
+        "-help                                                               Show this help screen\n"
+        "-print [filepath] [start offset]                                    Print save\n"
+        "-fix [filepath] [start offset]                                      Fix save checksums\n"
+        "-cars [filepath] [start offset]                                     Unlock all cars\n"
+        "-tracks [filepath] [start offset]                                   Unlock all tracks.\n"
+        "-trophies [filepath] [start offset]                                 Unlock all gold trophies\n"
+        "-lang [filepath] [start offset] [lang]                              Set game language. Set [lang] among {en, ge, fr, sp, it, sw}\n"
+        "-money [filepath] [start_offset] [money]                            Set amount of money\n"
+        "-car [filepath] [start_offset] [car name] [upgrade level] [color]   Add a car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}\n"
+    );
+}
+
 int main(int argc, char* argv[]) {
     switch(argc) {
+        case 2: {
+            if(strcmp(argv[1], PRINT_HELP) == 0) printhelp();
+            break;
+        }
+
         case 4: {
             NFSHSSave save;
             inits(&save, argv[2], strtol(argv[3], NULL, 10));
