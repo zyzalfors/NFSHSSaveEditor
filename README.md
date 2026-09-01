@@ -12,6 +12,9 @@ The usage is:
 -money [filepath] [start_offset] [money]                            Set amount of money
 -car [filepath] [start_offset] [car name] [upgrade level] [color]   Add a car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}
 ```
+
+To keep the editor logic simple, the user must enter the start offset of the save data inside the file. The first byte of the save is always the size (5292), followed by the save data with the headers and footer removed. This start offset can be determined using a hex editor.
+
 Research into save editing has allowed me to discover some interesting details about the game:
 * The language can be changed to any of the supported languages, even if that language is not listed as available in the game version. Changing to an otherwise unavailable language allows the text to be correctly translated, but voice car descriptions are absent for languages that are not officially supported by the build
 * Obviously, money is stored as a signed integer in the save data, so it is possible to set an amount significantly higher than the visual cap of 999999999
