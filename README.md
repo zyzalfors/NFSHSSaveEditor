@@ -6,17 +6,17 @@ The usage is:
 -print [filepath] [start offset]                                    Print save
 -fix [filepath] [start offset]                                      Fix save checksums
 -cars [filepath] [start offset]                                     Unlock all cars
--tracks [filepath] [start offset]                                   Unlock all tracks.
+-tracks [filepath] [start offset]                                   Unlock all tracks
 -trophies [filepath] [start offset]                                 Unlock all gold trophies
 -lang [filepath] [start offset] [lang]                              Set game language. Set [lang] among {en, ge, fr, sp, it, sw}
 -money [filepath] [start_offset] [money]                            Set amount of money
 -car [filepath] [start_offset] [car name] [upgrade level] [color]   Add a car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}
 ```
 
-To keep the editor logic simple, the user must enter the start offset of the save data inside the file. The first byte of the save is always the size (5292), followed by the save data with the headers and footer removed. This start offset can be determined using a hex editor.
+To keep the editor logic simple, the user must enter the start offset of the save data inside the file. The first 4 bytes of the save are always the size (5292) in little endian order, followed by the save data with the headers and footer removed. This start offset can be determined using a hex editor.
 
 Research into save editing has allowed me to discover some interesting details about the game:
-* The language can be changed to any of the supported languages, even if that language is not listed as available in the game version. Changing to an otherwise unavailable language allows the text to be correctly translated, but voice car descriptions are absent for languages that are not officially supported by the build
+* The language can be changed to any of the supported languages, even if that language is not listed as available in the game version. Changing to an otherwise unavailable language allows the text to be correctly translated, but voice car descriptions are absent
 * Obviously, money is stored as a signed integer in the save data, so it is possible to set an amount significantly higher than the visual cap of 999999999
 * Do not enter AU cars (hsvvt, falcon) in EU/US saves, as this can cause the game to crash on the car selection screen because the corresponding car data is absent from non-AU builds. I suspect the same issue may also occur with the JP version
 * Using the appropriate command, one can add the upgraded versions of the CLK-GTR and F1 GTR to the owned-car slots, even though they cannot normally be obtained
