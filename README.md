@@ -1,5 +1,5 @@
 # Need for Speed High Stakes/Road Challenge Save Editor
-This command-line tool allows users to read and edit save files for the PlayStation game Need for Speed High Stakes/Road Challenge. It supports US, EU, AU saves, with some compatibility for JP save. It supports any format, such as .gme or .psv, containing save data.
+This command-line tool allows users to read and edit save files for the PlayStation game Need for Speed High Stakes/Road Challenge. It supports US, EU, AU saves, with some compatibility for JP saves. It supports any format, such as .gme or .psv, containing save data.
 ```
 The usage is:
 -help                                                               Show this help screen
@@ -9,8 +9,8 @@ The usage is:
 -tracks [filepath] [start offset]                                   Unlock all tracks
 -trophies [filepath] [start offset]                                 Unlock all gold trophies
 -lang [filepath] [start offset] [lang]                              Set game language. Set [lang] among {en, ge, fr, sp, it, sw}
--money [filepath] [start_offset] [money]                            Set amount of money
--car [filepath] [start_offset] [car name] [upgrade level] [color]   Add a car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}
+-money [filepath] [start offset] [money]                            Set amount of money
+-car [filepath] [start offset] [car name] [upgrade level] [color]   Add a car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}
 ```
 
 To keep the editor logic simple, the user must enter the start offset of the save data inside the file. The first 4 bytes of the save are always the size (5292) in little endian order, followed by the save data with the headers and footer removed. This start offset can be determined using a hex editor.
