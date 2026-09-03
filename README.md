@@ -13,7 +13,7 @@ The usage is:
 -car [filepath] [start offset] [car name] [upgrade level] [color]   Add a car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}
 ```
 
-To keep the editor logic simple, the user must enter the start offset of the save data inside the file. The first 4 bytes of the save are always the size (5292) in little endian order, followed by the save data with the headers and footer removed. This start offset can be determined using a hex editor.
+To keep the editor logic simple, the user must enter the start offset of the save data within the file. The save data begins with 4 bytes that always contain its size (5292), stored in little-endian order. Any bytes before the start of the save data or after its end are ignored. The start offset can be determined using a hex editor.
 
 Research into save editing has allowed me to discover some interesting details about the game:
 * The language can be changed to any of the supported languages, even if that language is not listed as available in the game version. Changing to an otherwise unavailable language allows the text to be correctly translated, but voice car descriptions are absent
