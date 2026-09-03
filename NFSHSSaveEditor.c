@@ -26,8 +26,8 @@ void printhelp() {
         "-tracks [filepath] [start offset]                                   Unlock all tracks.\n"
         "-trophies [filepath] [start offset]                                 Unlock all gold trophies\n"
         "-lang [filepath] [start offset] [lang]                              Set game language. Set [lang] among {en, ge, fr, sp, it, sw}\n"
-        "-money [filepath] [start_offset] [money]                            Set amount of money\n"
-        "-car [filepath] [start_offset] [car name] [upgrade level] [color]   Add a car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}\n"
+        "-money [filepath] [start offset] [money]                            Set amount of money\n"
+        "-car [filepath] [start offset] [car name] [upgrade level] [color]   Add a car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}\n"
     );
 }
 
