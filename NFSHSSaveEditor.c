@@ -23,7 +23,7 @@ void printhelp() {
         "-print [filepath]                                    Print save(s)\n"
         "-fix [filepath]                                      Fix save(s) checksums\n"
         "-cars [filepath]                                     Unlock all cars\n"
-        "-tracks [filepath]                                   Unlock all tracks.\n"
+        "-tracks [filepath]                                   Unlock all tracks\n"
         "-trophies [filepath]                                 Unlock all gold trophies\n"
         "-lang [filepath] [lang]                              Set language [lang] among {en, ge, fr, sp, it, sw}\n"
         "-money [filepath] [money]                            Set money\n"
