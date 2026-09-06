@@ -1,20 +1,18 @@
 # Need for Speed High Stakes/Road Challenge Save Editor
-This command-line tool allows users to read and edit save files for the PlayStation game Need for Speed High Stakes/Road Challenge. It supports US, EU, AU saves, with some compatibility for JP saves. It supports any format, such as .gme or .psv, containing save data.
+This command-line tool allows users to read and edit save files for the PlayStation game Need for Speed High Stakes/Road Challenge. It supports US, EU, AU saves, with some compatibility for JP saves. It supports the formats RAW (raw save bytes), SC (PS1 save slot), MC (PS1 memorycard image), GME (DexDrive), PSV (PS1 save image for PS3).
 ```
-The usage is:
--help                                                               Show this help screen
--print [filepath] [start offset]                                    Print save
--fix [filepath] [start offset]                                      Fix save checksums
--cars [filepath] [start offset]                                     Unlock all cars
--tracks [filepath] [start offset]                                   Unlock all tracks
--trophies [filepath] [start offset]                                 Unlock all gold trophies
--lang [filepath] [start offset] [lang]                              Set game language. Set [lang] among {en, ge, fr, sp, it, sw}
--money [filepath] [start offset] [money]                            Set amount of money
--car [filepath] [start offset] [car name] [upgrade level] [color]   Add a car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}
+Usage: NFSHSaveEditor <command>
+Commands:
+-help                                                Show this help screen
+-print [filepath]                                    Print save(s)
+-fix [filepath]                                      Fix save(s) checksums
+-cars [filepath]                                     Unlock all cars
+-tracks [filepath]                                   Unlock all tracks.
+-trophies [filepath]                                 Unlock all gold trophies
+-lang [filepath] [lang]                              Set language [lang] among {en, ge, fr, sp, it, sw}
+-money [filepath] [money]                            Set money
+-car [filepath] [car name] [upgrade level] [color]   Set car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}
 ```
-
-To keep the editor logic simple, the user must enter the start offset of the save data within the file. The save data begins with 4 bytes that always contain its size (5292), stored in little-endian order. Any bytes before the start of the save data or after its end are ignored. The start offset can be determined using a hex editor.
-
 Research into save editing has allowed me to discover some interesting details about the game:
 * The language can be changed to any of the supported languages, even if that language is not listed as available in the game version. Changing to an otherwise unavailable language allows the text to be correctly translated, but voice car descriptions are absent
 * Obviously, money is stored as a signed integer in the save data, so it is possible to set an amount significantly higher than the visual cap of 999999999
