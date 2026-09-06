@@ -9,7 +9,7 @@ Commands:
 -print [filepath]                                    Print save(s)
 -fix [filepath]                                      Fix save(s) checksums
 -cars [filepath]                                     Unlock all cars
--tracks [filepath]                                   Unlock all tracks.
+-tracks [filepath]                                   Unlock all tracks
 -trophies [filepath]                                 Unlock all gold trophies
 -lang [filepath] [lang]                              Set language [lang] among {en, ge, fr, sp, it, sw}
 -money [filepath] [money]                            Set money
