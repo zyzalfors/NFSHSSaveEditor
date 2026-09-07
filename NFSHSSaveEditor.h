@@ -72,7 +72,7 @@ typedef struct {
 
 static const char* serials[] = {"SLUS-00826", "SLES-01788", "SLES-01789", "SLES-01790", "SLPS-02099"};
 static const char* languages[] = {"en", "ge", "fr", "sp", "it", "sw"};
-static const char* cars[] = {"slk", "z3", "hsvvt", "falcon", "camaro", "firebird", "db7", "xkr", "m5", "corvette", "550", "911", "f50", "diablo", "clk", "f1", "race_911", "?", "race_corvette", "phantom", "titan", "?", "cop_caprice", "cop_hsvvt", "cop_m5", "cop_corvette", "cop_911", "cop_diablo", "jailbird"};
+static const char* cars[] = {"slk", "z3", "hsvvt/skyline", "falcon", "camaro", "firebird", "db7", "xkr", "m5", "corvette", "550", "911", "f50", "diablo", "clk", "f1", "race_911", "race_hsvvt/race_skyline", "race_corvette", "phantom", "titan", NULL, "cop_caprice", "cop_hsvvt", "cop_m5", "cop_corvette", "cop_911", "cop_diablo", "jailbird"};
 static const uint8_t upgradedata[] = {0x00, 0x01, 0x03, 0x07};
 static const uint8_t unlockedcardata = 0x01;
 static const uint8_t alltracksdata[] = {0x01, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -80,7 +80,7 @@ static const uint8_t goldtrophydata = 0x01;
 
 static int find(const char* str, const char* list[], const size_t n) {
     for(size_t i = 0; i < n; i++)
-        if(strcmp(str, list[i]) == 0) return i;
+        if(list[i] && strcmp(str, list[i]) == 0) return i;
 
     return -1;
 }

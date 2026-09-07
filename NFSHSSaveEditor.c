@@ -27,7 +27,7 @@ void printhelp() {
         "-trophies [filepath]                                 Unlock all gold trophies\n"
         "-lang [filepath] [lang]                              Set language [lang] among {en, ge, fr, sp, it, sw}\n"
         "-money [filepath] [money]                            Set money\n"
-        "-car [filepath] [car name] [upgrade level] [color]   Set car to first free slot. Set [car name] among {slk, z3, hsvvt, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}\n"
+        "-car [filepath] [car name] [upgrade level] [color]   Set car to first free slot. Set [car name] among {slk, z3, hsvvt/skyline, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_hsvvt/race_skyline, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}\n"
     );
 }
 
