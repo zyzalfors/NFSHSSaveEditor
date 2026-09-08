@@ -65,7 +65,7 @@ typedef struct {
     const char* path;
     uint8_t* data;
     size_t size;
-    long* saveoffsets;
+    size_t* saveoffsets;
     size_t savecount;
     FORMAT format;
 } NFSHSSaveEditor;
@@ -176,10 +176,8 @@ static void getcrc16(const uint8_t* buf, int size, uint8_t crc[]) {
 }
 
 void clear(NFSHSSaveEditor* editor) {
-    if(!editor) return;
-    if(editor->data) free(editor->data);
-    if(editor->saveoffsets) free(editor->saveoffsets);
-
+    free(editor->data);
+    free(editor->saveoffsets);
     editor->path = NULL;
     editor->data = NULL;
     editor->size = 0;
@@ -188,13 +186,10 @@ void clear(NFSHSSaveEditor* editor) {
     editor->format = UNK;
 }
 
-void parse(NFSHSSaveEditor* editor) {
-    if(!editor || !editor->data || editor->size == 0) return;
-    if(editor->saveoffsets) free(editor->saveoffsets);
-
+static void parse(NFSHSSaveEditor* editor) {
     if(editor->size >= RAW_SAVE_SIZE) {
         if(memcmp(editor->data, RAW_MAGIC, sizeof(RAW_MAGIC) - 1) == 0) {
-            editor->saveoffsets = (long*) malloc(sizeof(long));
+            editor->saveoffsets = (size_t*) malloc(sizeof(size_t));
             editor->format = RAW;
 
             if(editor->saveoffsets) {
@@ -208,7 +203,7 @@ void parse(NFSHSSaveEditor* editor) {
 
     if(editor->size >= SC_HEADER_SIZE + RAW_SAVE_SIZE) {
         if(memcmp(editor->data, SC_MAGIC, sizeof(SC_MAGIC) - 1) == 0) {
-            editor->saveoffsets = (long*) malloc(sizeof(long));
+            editor->saveoffsets = (size_t*) malloc(sizeof(size_t));
             editor->format = SC;
 
             if(editor->saveoffsets) {
@@ -227,7 +222,7 @@ void parse(NFSHSSaveEditor* editor) {
             memcpy(serial, editor->data + 102, sizeof(serial) - 1);
 
             if(find(serial, serials, ARRAY_SIZE(serials)) > -1) {
-                editor->saveoffsets = (long*) malloc(sizeof(long));
+                editor->saveoffsets = (size_t*) malloc(sizeof(size_t));
                 editor->format = PSV;
 
                 if(editor->saveoffsets) {
@@ -270,14 +265,14 @@ void parse(NFSHSSaveEditor* editor) {
         }
 
         if(n > 0) {
-            editor->saveoffsets = (long*) malloc(n * sizeof(long));
+            editor->saveoffsets = (size_t*) malloc(n * sizeof(size_t));
 
             if(editor->saveoffsets) {
                 editor->savecount = n;
                 size_t k = 0;
 
                 for(size_t i = 1; i < MC_BLOCK_COUNT; i++)
-                    if(temp[i] != -1) editor->saveoffsets[k++] = temp[i];
+                    if(temp[i] != -1) editor->saveoffsets[k++] = (size_t) temp[i];
             }
         }
     }
@@ -327,8 +322,6 @@ NFSHSSaveEditor init(const char* path) {
 }
 
 void print(NFSHSSaveEditor* editor) {
-    if(!editor || !editor->data || editor->size == 0 || !editor->saveoffsets) return;
-
     switch(editor->format) {
         case UNK:
             printf("Format: unknown\n");
@@ -444,8 +437,6 @@ void print(NFSHSSaveEditor* editor) {
 }
 
 void fix(NFSHSSaveEditor* editor) {
-    if(!editor || !editor->data || editor->size == 0 || !editor->saveoffsets) return;
-
     uint8_t crc[sizeof(uint32_t)];
     for(size_t k = 0; k < editor->savecount; k++) {
         getcrc16(editor->data + editor->saveoffsets[k] + FRONTEND_START, FRONTEND_SIZE, crc);
@@ -474,8 +465,6 @@ void fix(NFSHSSaveEditor* editor) {
 }
 
 void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* str) {
-    if(!editor || !editor->data || editor->size == 0 || !editor->saveoffsets) return;
-
     switch(type) {
         case LANGUAGE: {
             if(!str) return;
@@ -566,8 +555,6 @@ void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* 
 }
 
 void save(NFSHSSaveEditor* editor) {
-    if(!editor || !editor->path || !editor->data || editor->size == 0 || !editor->saveoffsets || editor->savecount == 0) return;
-
     FILE* fp = fopen(editor->path, "wb");
     if(fp) {
         fwrite(editor->data, sizeof(uint8_t), editor->size, fp);
