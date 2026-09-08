@@ -222,15 +222,21 @@ void parse(NFSHSSaveEditor* editor) {
 
     if(editor->size >= PSV_HEADER_SIZE + SC_HEADER_SIZE + RAW_SAVE_SIZE) {
         if(memcmp(editor->data, PSV_MAGIC, sizeof(PSV_MAGIC) - 1) == 0) {
-            editor->saveoffsets = (long*) malloc(sizeof(long));
-            editor->format = PSV;
+            char serial[SERIAL_SIZE + 1];
+            serial[SERIAL_SIZE] = '\0';
+            memcpy(serial, editor->data + 102, sizeof(serial) - 1);
 
-            if(editor->saveoffsets) {
-                editor->saveoffsets[0] = PSV_HEADER_SIZE + SC_HEADER_SIZE;
-                editor->savecount = 1;
+            if(find(serial, serials, ARRAY_SIZE(serials)) > -1) {
+                editor->saveoffsets = (long*) malloc(sizeof(long));
+                editor->format = PSV;
+
+                if(editor->saveoffsets) {
+                    editor->saveoffsets[0] = PSV_HEADER_SIZE + SC_HEADER_SIZE;
+                    editor->savecount = 1;
+                }
+
+                return;
             }
-
-            return;
         }
     }
 
@@ -277,46 +283,47 @@ void parse(NFSHSSaveEditor* editor) {
     }
 }
 
-void init(NFSHSSaveEditor* editor, const char* path) {
-    if(!editor || !path) return;   
+NFSHSSaveEditor init(const char* path) {
+    NFSHSSaveEditor editor;
+    editor.path = path;
+    editor.data = NULL;
+    editor.size = 0;
+    editor.saveoffsets = NULL;
+    editor.savecount = 0;
+    editor.format = UNK;
+    if(!path) return editor;
 
-    editor->path = path;
-    editor->data = NULL;
-    editor->size = 0;
-    editor->saveoffsets = NULL;
-    editor->savecount = 0;
-    editor->format = UNK;
-
-    FILE* fp = fopen(editor->path, "rb");
-    if(!fp) return;
+    FILE* fp = fopen(editor.path, "rb");
+    if(!fp) return editor;
 
     fseek(fp, 0, SEEK_END);
 
     long fs = ftell(fp);
     if(fs <= 0) {
         fclose(fp);
-        return;
+        return editor;
     }
 
-    editor->data = (uint8_t*) malloc(fs * sizeof(uint8_t));
-    if(!editor->data) {
+    editor.data = (uint8_t*) malloc(fs * sizeof(uint8_t));
+    if(!editor.data) {
         fclose(fp);
-        return;
+        return editor;
     }
 
     fseek(fp, 0, SEEK_SET);
 
-    if(fread(editor->data, sizeof(uint8_t), (size_t) fs, fp) != (size_t) fs) {
+    if(fread(editor.data, sizeof(uint8_t), (size_t) fs, fp) != (size_t) fs) {
         fclose(fp);
-        free(editor->data);
-        editor->data = NULL;
-        return;
+        free(editor.data);
+        editor.data = NULL;
+        return editor;
     }
 
-    editor->size = (size_t) fs;
+    editor.size = (size_t) fs;
     fclose(fp);
 
-    parse(editor);
+    parse(&editor);
+    return editor;
 }
 
 void print(NFSHSSaveEditor* editor) {
@@ -324,7 +331,7 @@ void print(NFSHSSaveEditor* editor) {
 
     switch(editor->format) {
         case UNK:
-            printf("Format: ?\n");
+            printf("Format: unknown\n");
             break;
 
         case RAW:
@@ -379,7 +386,7 @@ void print(NFSHSSaveEditor* editor) {
                 printf("slot %d | car ? | ", (int) i);
 
             for(size_t j = 0; j < ARRAY_SIZE(upgradedata); j++)
-                if(editor->data[pos + OWNED_CAR_SLOT_SIZE * i + 1] == upgradedata[j]) upgidx = j;
+                if(editor->data[pos + OWNED_CAR_SLOT_SIZE * i + 1] == upgradedata[j]) upgidx = (int) j;
 
             if(upgidx > -1) printf("upgrade %d | ", upgidx);
             else printf("upgrade ? | ");
@@ -498,7 +505,7 @@ void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* 
 
                     for(size_t i = 0; i < OWNED_CAR_SLOT_COUNT; i++) {
                         if(editor->data[editor->saveoffsets[k] + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * i] == 0xFF) {
-                            slotidx = i;
+                            slotidx = (int) i;
                             break;
                         }
                     }

@@ -2,6 +2,7 @@
 This command-line tool allows users to read and edit save files for the PlayStation game Need for Speed High Stakes/Road Challenge. It supports US, EU, AU, JP saves.
 
 It supports the formats RAW (raw save bytes), SC (PS1 save slot), MC (PS1 memory card image), GME (DexDrive), PSV (PS1 save image for PS3).
+
 ```
 Usage: NFSHSaveEditor <command>
 Commands:
@@ -15,9 +16,10 @@ Commands:
 -money [filepath] [money]                            Set money
 -car [filepath] [car name] [upgrade level] [color]   Set car to first free slot. Set [car name] among {slk, z3, hsvvt/skyline, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_hsvvt/race_skyline, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}
 ```
+
 Research into save editing has allowed me to discover some interesting details about the game:
 * The language can be changed to any of the supported languages, even if that language is not listed as available in the game version. Changing to an otherwise unavailable language allows the text to be correctly translated, but voice car descriptions are absent
 * Obviously, money is stored as a signed integer in the save data, so it is possible to set an amount significantly higher than the visual cap of 999999999
-* Do not enter AU/JP cars (hsvvt/skyline, falcon) in EU/US saves, as this can cause the game to crash on the car selection screen because the corresponding car data is absent from non-AU/JP builds. I suspect the same issue may also occur with the JP version
+* Do not enter AU/JP cars (hsvvt/skyline, falcon) in EU/US saves, as this can cause the game to crash on the car selection screen because the corresponding car data is absent from non-AU/JP builds. I suspect the similar issues may also occur with JP/AU saves
 * Using the appropriate command, one can add the upgraded versions of the CLK-GTR and F1 GTR to the owned-car slots, even though they cannot normally be obtained
-* The most curious fact is that any car listed in the usage can be added to the owned-car slots, including police cars and the Jailbird helicopter! If a police car is added and used in a race (either a single race or a tournament), the game appears to behave correctly, but it may crash in some cases
+* The most curious fact is that any car listed in the usage can be added to the owned-car slots, including police cars and the Jailbird helicopter! If a police car is added and used in a race (either a single race or a tournament), the game is still playable, but it may crash in some cases

@@ -40,35 +40,30 @@ int main(int argc, char* argv[]) {
 
         case 3: {
             if(strcmp(argv[1], PRINT) == 0) {
-                NFSHSSaveEditor editor;
-                init(&editor, argv[2]);
+                NFSHSSaveEditor editor = init(argv[2]);
                 print(&editor);
                 clear(&editor);
             }
             else if(strcmp(argv[1], FIX) == 0) {
-                NFSHSSaveEditor editor;
-                init(&editor, argv[2]);
+                NFSHSSaveEditor editor = init(argv[2]);
                 fix(&editor);
                 save(&editor);
                 clear(&editor);
             }
             else if(strcmp(argv[1], UNLOCK_CARS) == 0) {
-                NFSHSSaveEditor editor;
-                init(&editor, argv[2]);
+                NFSHSSaveEditor editor = init(argv[2]);
                 update(&editor, CARS, NULL, NULL);
                 save(&editor);
                 clear(&editor);
             }
             else if(strcmp(argv[1], UNLOCK_TRACKS) == 0) {
-                NFSHSSaveEditor editor;
-                init(&editor, argv[2]);
+                NFSHSSaveEditor editor = init(argv[2]);
                 update(&editor, TRACKS, NULL, NULL);
                 save(&editor);
                 clear(&editor);
             }
             else if(strcmp(argv[1], SET_GOLD_TROPHIES) == 0) {
-                NFSHSSaveEditor editor;
-                init(&editor, argv[2]);
+                NFSHSSaveEditor editor = init(argv[2]);
                 update(&editor, TROPHIES, NULL, NULL);
                 save(&editor);
                 clear(&editor);
@@ -79,15 +74,13 @@ int main(int argc, char* argv[]) {
 
         case 4: {
             if(strcmp(argv[1], SET_LANGUAGE) == 0) {
-                NFSHSSaveEditor editor;
-                init(&editor, argv[2]);
+                NFSHSSaveEditor editor = init(argv[2]);
                 update(&editor, LANGUAGE, NULL, argv[3]);
                 save(&editor);
                 clear(&editor);
             }
             else if(strcmp(argv[1], SET_MONEY) == 0) {
-                NFSHSSaveEditor editor;
-                init(&editor, argv[2]);
+                NFSHSSaveEditor editor = init(argv[2]);
                 int32_t val = strtol(argv[3], NULL, 10);
                 update(&editor, MONEY, &val, NULL);
                 save(&editor);
@@ -99,8 +92,7 @@ int main(int argc, char* argv[]) {
 
         case 6: {
             if(strcmp(argv[1], SET_CAR) == 0) {
-                NFSHSSaveEditor editor;
-                init(&editor, argv[2]);
+                NFSHSSaveEditor editor = init(argv[2]);
                 int32_t val[2] = {strtol(argv[4], NULL, 10), strtol(argv[5], NULL, 10)};
                 update(&editor, CAR, val, argv[3]);
                 save(&editor);
