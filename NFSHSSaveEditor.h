@@ -454,14 +454,6 @@ void fix(NFSHSSaveEditor* editor) {
         getcrc16(editor->data + editor->saveoffsets[k] + RECORD_INFO_START, RECORD_INFO_SIZE, crc);
         memcpy(editor->data + editor->saveoffsets[k] + RECORD_INFO_CRC_START, crc, sizeof(crc));
     }
-
-    if(editor->savecount > 0) {
-        printf("Fixed frontend CRC\n");
-        printf("Fixed car info CRC\n");
-        printf("Fixed track info CRC\n");
-        printf("Fixed tournament info CRC\n");
-        printf("Fixed record info CRC\n");
-    }
 }
 
 void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* str) {
@@ -474,7 +466,6 @@ void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* 
             if(langidx > -1) {
                 for(size_t k = 0; k < editor->savecount; k++)
                     editor->data[editor->saveoffsets[k] + LANGUAGE_START] = (uint8_t) langidx;
-                printf("Set language: %s\n", str);
             }
             else return;
 
@@ -503,7 +494,6 @@ void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* 
                     editor->data[editor->saveoffsets[k] + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * slotidx] = (uint8_t) caridx;
                     editor->data[editor->saveoffsets[k] + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * slotidx + 1] = upgradedata[upgidx];
                     editor->data[editor->saveoffsets[k] + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * slotidx + 2] = (uint8_t) val[1];
-                    printf("Added car: slot %d | car %s | upgrade %d | color %d\n", slotidx, str, val[0], val[1]);
                 }
             }
             else return;
@@ -516,7 +506,6 @@ void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* 
                 memset(editor->data + editor->saveoffsets[k] + CAR_AVAILABILITY_START, unlockedcardata, CAR_AVAILABILITY_SIZE);
                 memset(editor->data + editor->saveoffsets[k] + CAR_VISIBILITY_START, unlockedcardata, CAR_VISIBILITY_SIZE);
             }
-            printf("Unlocked all cars\n");
 
             break;
         }
@@ -524,7 +513,6 @@ void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* 
         case TRACKS: {
             for(size_t k = 0; k < editor->savecount; k++)
                 memcpy(editor->data + editor->saveoffsets[k] + TRACK_INFO_START, alltracksdata, ARRAY_SIZE(alltracksdata));
-            printf("Unlocked all tracks\n");
 
             break;
         }
@@ -537,7 +525,6 @@ void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* 
 
             for(size_t k = 0; k < editor->savecount; k++)
                 memcpy(editor->data + editor->saveoffsets[k] + TOURNAMENT_INFO_START, buf, sizeof(buf));
-            printf("Set money: %d\n", val[0]);
 
             break;
         }
@@ -545,7 +532,6 @@ void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* 
         case TROPHIES: {
             for(size_t k = 0; k < editor->savecount; k++)
                 memset(editor->data + editor->saveoffsets[k] + TROPHIES_START, goldtrophydata, TROPHIES_SIZE);
-            printf("Set gold trophies\n");
 
             break;
         }
@@ -559,7 +545,6 @@ void save(NFSHSSaveEditor* editor) {
     if(fp) {
         fwrite(editor->data, sizeof(uint8_t), editor->size, fp);
         fclose(fp);
-        printf("Saved to storage\n");
     }
 }
 
