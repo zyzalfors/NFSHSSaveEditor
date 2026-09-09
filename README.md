@@ -12,7 +12,7 @@ Commands:
 -cars [filepath]                                     Unlock all cars
 -tracks [filepath]                                   Unlock all tracks
 -trophies [filepath]                                 Unlock all gold trophies
--lang [filepath] [lang]                              Set language [lang] among {en, ge, fr, sp, it, sw}
+-lang [filepath] [lang]                              Set language [lang] among {en, de, fr, sp, it, sw}
 -money [filepath] [money]                            Set money
 -car [filepath] [car name] [upgrade level] [color]   Set car to first free slot. Set [car name] among {slk, z3, hsvvt/skyline, falcon, camaro, firebird, db7, xkr, m5, corvette, 550, 911, f50, diablo, clk, f1, race_911, race_hsvvt/race_skyline, race_corvette, phantom, titan, cop_caprice, cop_hsvvt, cop_m5, cop_corvette, cop_911, cop_diablo, jailbird}. Set [upgrade level] among {0, 1, 2, 3}. Set [color] among {0, 1,...}
 ```
