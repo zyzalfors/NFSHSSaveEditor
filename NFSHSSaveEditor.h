@@ -74,9 +74,9 @@ typedef struct {
     char name[PLAYER_NAME_SIZE + 1];
     int32_t money;
     NFSHSOwnedCar ownedcars[OWNED_CAR_SLOT_COUNT];
-    uint8_t allcars;
-    uint8_t alltracks;
-    uint8_t goldtrophies;
+    uint8_t unlockallcars;
+    uint8_t unlockalltracks;
+    uint8_t setgoldtrophies;
 } NFSHSSave;
 
 typedef struct {
@@ -228,9 +228,9 @@ void NFSHSSaveEditor_parseinfo(NFSHSSaveEditor* editor) {
             editor->saves[i].ownedcars[j] = car;
         }
 
-        editor->saves[i].allcars = 0;
-        editor->saves[i].alltracks = 0;
-        editor->saves[i].goldtrophies = 0;
+        editor->saves[i].unlockallcars = 0;
+        editor->saves[i].unlockalltracks = 0;
+        editor->saves[i].setgoldtrophies = 0;
     }
 }
 
@@ -446,17 +446,17 @@ void NFSHSSaveEditor_updateownedcar(NFSHSSaveEditor* editor, const size_t saveid
 
 void NFSHSSaveEditor_unlockcars(NFSHSSaveEditor* editor, const size_t saveidx) {
     if(saveidx >= editor->savecount) return;
-    editor->saves[saveidx].allcars = 1;
+    editor->saves[saveidx].unlockallcars = 1;
 }
 
 void NFSHSSaveEditor_unlocktracks(NFSHSSaveEditor* editor, const size_t saveidx) {
     if(saveidx >= editor->savecount) return;
-    editor->saves[saveidx].alltracks = 1;
+    editor->saves[saveidx].unlockalltracks = 1;
 }
 
 void NFSHSSaveEditor_setgoldtrophies(NFSHSSaveEditor* editor, const size_t saveidx) {
     if(saveidx >= editor->savecount) return;
-    editor->saves[saveidx].goldtrophies = 1;
+    editor->saves[saveidx].setgoldtrophies = 1;
 }
 
 void NFSHSSaveEditor_update(NFSHSSaveEditor* editor) {
@@ -479,15 +479,15 @@ void NFSHSSaveEditor_update(NFSHSSaveEditor* editor) {
             editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j + 2] = modidx > -1 ? colidx : 0;
         }
 
-        if(editor->saves[i].allcars) {
+        if(editor->saves[i].unlockallcars) {
             memset(editor->data + editor->saves[i].start + CAR_AVAILABILITY_START, NFSHSSaveEditor_unlockedcardata, CAR_AVAILABILITY_SIZE);
             memset(editor->data + editor->saves[i].start + CAR_VISIBILITY_START, NFSHSSaveEditor_unlockedcardata, CAR_VISIBILITY_SIZE);
         }
 
-        if(editor->saves[i].alltracks)
+        if(editor->saves[i].unlockalltracks)
             memcpy(editor->data + editor->saves[i].start + TRACK_INFO_START, NFSHSSaveEditor_alltracksdata, ARRAY_SIZE(NFSHSSaveEditor_alltracksdata));
 
-        if(editor->saves[i].goldtrophies)
+        if(editor->saves[i].setgoldtrophies)
             memset(editor->data + editor->saves[i].start + TROPHIES_START, NFSHSSaveEditor_goldtrophydata, TROPHIES_SIZE);
     }
 
