@@ -1,5 +1,7 @@
-#ifndef NFSHSSAVEEDITOR_H
-#define NFSHSSAVEEDITOR_H
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
@@ -34,6 +36,7 @@
 
 #define OWNED_CAR_SLOT_SIZE 4
 #define OWNED_CAR_SLOT_COUNT 32
+#define EMPTY_CAR_SLOT_FLAG 0xff
 
 #define CAR_AVAILABILITY_START 1240
 #define CAR_AVAILABILITY_SIZE 45
@@ -58,51 +61,42 @@
 #define TOURNAMENT_INFO_CRC_START 5284
 #define RECORD_INFO_CRC_START 5288
 
-typedef enum {UNK, RAW, SC, MC, PSV, GME} FORMAT;
-typedef enum {LANGUAGE, CAR, CARS, TRACKS, MONEY, TROPHIES} TYPE;
+typedef struct {
+    const char* model;
+    uint8_t upgrade;
+    uint8_t color;
+} NFSHSOwnedCar;
 
 typedef struct {
+    size_t start;
+    const char* serial;
+    const char* language;
+    char name[PLAYER_NAME_SIZE + 1];
+    int32_t money;
+    NFSHSOwnedCar ownedcars[OWNED_CAR_SLOT_COUNT];
+    uint8_t allcars;
+    uint8_t alltracks;
+    uint8_t goldtrophies;
+} NFSHSSave;
+
+typedef struct {
+    const char* format;
     const char* path;
     uint8_t* data;
     size_t size;
-    size_t* saveoffsets;
+    NFSHSSave* saves;
     size_t savecount;
-    FORMAT format;
 } NFSHSSaveEditor;
 
-static const char* serials[] = {"SLUS-00826", "SLES-01788", "SLES-01789", "SLES-01790", "SLPS-02099"};
-static const char* languages[] = {"en", "de", "fr", "sp", "it", "sw"};
-static const char* cars[] = {"slk", "z3", "hsvvt/skyline", "falcon", "camaro", "firebird", "db7", "xkr", "m5", "corvette", "550", "911", "f50", "diablo", "clk", "f1", "race_911", "race_hsvvt/race_skyline", "race_corvette", "phantom", "titan", NULL, "cop_caprice", "cop_hsvvt", "cop_m5", "cop_corvette", "cop_911", "cop_diablo", "jailbird"};
-static const uint8_t upgradedata[] = {0x00, 0x01, 0x03, 0x07};
-static const uint8_t unlockedcardata = 0x01;
-static const uint8_t alltracksdata[] = {0x01, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
-static const uint8_t goldtrophydata = 0x01;
+const char* NFSHSSaveEditor_serials[] = {"SLUS-00826", "SLES-01788", "SLES-01789", "SLES-01790"};
+const char* NFSHSSaveEditor_languages[] = {"EN", "DE", "FR", "SP", "IT", "SW"};
+const char* NFSHSSaveEditor_models[] = {"SLK", "Z3", "VT", "Falcon", "Camaro", "Firebird", "DB7", "XKR", "M5", "Corvette", "550", "911", "F50", "Diablo", "CLK GTR", "F1 GTR", "Race 911", "Race VT", "Race Corvette", "Phantom", "Titan", NULL, "Police Caprice", "Police VT", "Police M5", "Police Corvette", "Police 911", "Police Diablo", "Jailbird"};
+const uint8_t NFSHSSaveEditor_upgrades[] = {0x00, 0x01, 0x03, 0x07};
+const uint8_t NFSHSSaveEditor_unlockedcardata = 0x01;
+const uint8_t NFSHSSaveEditor_alltracksdata[] = {0x01, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
+const uint8_t NFSHSSaveEditor_goldtrophydata = 0x01;
 
-static int find(const char* str, const char* list[], const size_t n) {
-    for(size_t i = 0; i < n; i++)
-        if(list[i] && strcmp(str, list[i]) == 0) return i;
-
-    return -1;
-}
-
-static void lower(char* s) {
-    for(size_t i = 0; s[i] != '\0'; i++)
-        s[i] = (char) tolower((unsigned char) s[i]);
-}
-
-static int32_t toint(const uint8_t* buf) {
-    return (int32_t) (((uint32_t) buf[0]) | ((uint32_t) buf[1] << 8) | ((uint32_t) buf[2] << 16) | ((uint32_t) buf[3] << 24));
-}
-
-static void fromint(const int32_t val, uint8_t* buf) {
-    uint32_t v = (uint32_t) val;
-    buf[0] = (uint8_t) v;
-    buf[1] = (uint8_t) (v >> 8);
-    buf[2] = (uint8_t) (v >> 16);
-    buf[3] = (uint8_t) (v >> 24);
-}
-
-static const uint8_t table1[256] = {
+const uint8_t NFSHSSaveEditor_table1[256] = {
     0x00, 0xc1, 0x81, 0x40, 0x01, 0xc0, 0x80, 0x41, 0x01, 0xc0, 0x80, 0x41, 0x00, 0xc1, 0x81, 0x40,
     0x01, 0xc0, 0x80, 0x41, 0x00, 0xc1, 0x81, 0x40, 0x00, 0xc1, 0x81, 0x40, 0x01, 0xc0, 0x80, 0x41,
     0x01, 0xc0, 0x80, 0x41, 0x00, 0xc1, 0x81, 0x40, 0x00, 0xc1, 0x81, 0x40, 0x01, 0xc0, 0x80, 0x41,
@@ -121,7 +115,7 @@ static const uint8_t table1[256] = {
     0x00, 0xc1, 0x81, 0x40, 0x01, 0xc0, 0x80, 0x41, 0x01, 0xc0, 0x80, 0x41, 0x00, 0xc1, 0x81, 0x40
 };
 
-static const uint8_t table2[256] = {
+const uint8_t NFSHSSaveEditor_table2[256] = {
     0x00, 0xc0, 0xc1, 0x01, 0xc3, 0x03, 0x02, 0xc2, 0xc6, 0x06, 0x07, 0xc7, 0x05, 0xc5, 0xc4, 0x04,
     0xcc, 0x0c, 0x0d, 0xcd, 0x0f, 0xcf, 0xce, 0x0e, 0x0a, 0xca, 0xcb, 0x0b, 0xc9, 0x09, 0x08, 0xc8,
     0xd8, 0x18, 0x19, 0xd9, 0x1b, 0xdb, 0xda, 0x1a, 0x1e, 0xde, 0xdf, 0x1f, 0xdd, 0x1d, 0x1c, 0xdc,
@@ -140,30 +134,56 @@ static const uint8_t table2[256] = {
     0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80, 0x40
 };
 
-static void getcrc16(const uint8_t* buf, int size, uint8_t crc[]) {
+int NFSHSSaveEditor_findstr(const char* s, const char* list[], const size_t n) {
+    for(size_t i = 0; i < n; i++)
+        if(s && list[i] && strcmp(s, list[i]) == 0) return (int) i;
+
+    return -1;
+}
+
+int NFSHSSaveEditor_findbyte(const uint8_t v, const uint8_t list[], const size_t n) {
+    for(size_t i = 0; i < n; i++)
+        if(list[i] == v) return (int) i;
+
+    return -1;
+}
+
+int32_t NFSHSSaveEditor_toint(const uint8_t buf[]) {
+    return (int32_t) (((uint32_t) buf[0]) | ((uint32_t) buf[1] << 8) | ((uint32_t) buf[2] << 16) | ((uint32_t) buf[3] << 24));
+}
+
+void NFSHSSaveEditor_fromint(const int32_t v, uint8_t buf[]) {
+    uint32_t uv = (uint32_t) v;
+    buf[0] = (uint8_t) uv;
+    buf[1] = (uint8_t) (uv >> 8);
+    buf[2] = (uint8_t) (uv >> 16);
+    buf[3] = (uint8_t) (uv >> 24);
+}
+
+void NFSHSSaveEditor_getcrc16(const uint8_t buf[], int size, uint8_t crc[]) {
     uint8_t hi = 0xfb;
     uint8_t lo = 0xea;
 
     while(size >= 4) {
-        uint8_t idx = buf[0] ^ lo;
+        const uint8_t idx = buf[0] ^ lo;
 
-        hi = buf[1] ^ table1[idx] ^ hi;
+        hi = buf[1] ^ NFSHSSaveEditor_table1[idx] ^ hi;
 
-        uint8_t b1 = buf[2] ^ table1[hi] ^ table2[idx];
-        uint8_t b2 = buf[3] ^ table1[b1] ^ table2[hi];
+        const uint8_t b1 = buf[2] ^ NFSHSSaveEditor_table1[hi] ^ NFSHSSaveEditor_table2[idx];
+        const uint8_t b2 = buf[3] ^ NFSHSSaveEditor_table1[b1] ^ NFSHSSaveEditor_table2[hi];
 
-        hi = table2[b2];
-        lo = table1[b2] ^ table2[b1];
+        hi = NFSHSSaveEditor_table2[b2];
+        lo = NFSHSSaveEditor_table1[b2] ^ NFSHSSaveEditor_table2[b1];
 
         buf += 4;
         size -= 4;
     }
 
     while(size > 0) {
-        uint8_t idx = buf[0] ^ lo;
+        const uint8_t idx = buf[0] ^ lo;
 
-        lo = table1[idx] ^ hi;
-        hi = table2[idx];
+        lo = NFSHSSaveEditor_table1[idx] ^ hi;
+        hi = NFSHSSaveEditor_table2[idx];
 
         buf++;
         size--;
@@ -175,26 +195,58 @@ static void getcrc16(const uint8_t* buf, int size, uint8_t crc[]) {
     crc[3] = 0;
 }
 
-void clear(NFSHSSaveEditor* editor) {
-    free(editor->data);
-    free(editor->saveoffsets);
-    editor->path = NULL;
-    editor->data = NULL;
-    editor->size = 0;
-    editor->saveoffsets = NULL;
-    editor->savecount = 0;
-    editor->format = UNK;
+void NFSHSSaveEditor_clear(NFSHSSaveEditor* editor) {
+    if(editor->data) free(editor->data);
+    if(editor->saves) free(editor->saves);
+    memset(editor, 0, sizeof(NFSHSSaveEditor));
 }
 
-static void parse(NFSHSSaveEditor* editor) {
+void NFSHSSaveEditor_parseinfo(NFSHSSaveEditor* editor) {
+    for(size_t i = 0; i < editor->savecount; i++) {
+        const uint8_t lanidx = editor->data[editor->saves[i].start + LANGUAGE_START];
+        editor->saves[i].language = lanidx < ARRAY_SIZE(NFSHSSaveEditor_languages) ? NFSHSSaveEditor_languages[lanidx] : NFSHSSaveEditor_languages[0];
+
+        memcpy(editor->saves[i].name, editor->data + editor->saves[i].start + PLAYER_NAME_START, PLAYER_NAME_SIZE);
+        editor->saves[i].name[PLAYER_NAME_SIZE] = '\0';
+
+        editor->saves[i].money = NFSHSSaveEditor_toint(editor->data + editor->saves[i].start + TOURNAMENT_INFO_START);
+
+        const size_t pos = editor->saves[i].start + CAR_INFO_START;
+        for(size_t j = 0; j < OWNED_CAR_SLOT_COUNT; j++) {
+            const uint8_t modidx = editor->data[pos + OWNED_CAR_SLOT_SIZE * j];
+            NFSHSOwnedCar car = {NULL, 0, 0};
+
+            if(modidx < ARRAY_SIZE(NFSHSSaveEditor_models)) {
+                car.model = NFSHSSaveEditor_models[modidx];
+
+                const int upgidx = NFSHSSaveEditor_findbyte(editor->data[pos + OWNED_CAR_SLOT_SIZE * j + 1], NFSHSSaveEditor_upgrades, ARRAY_SIZE(NFSHSSaveEditor_upgrades));
+                if(upgidx > -1) car.upgrade = (uint8_t) upgidx;
+
+                car.color = editor->data[pos + OWNED_CAR_SLOT_SIZE * j + 2];
+            }
+
+            editor->saves[i].ownedcars[j] = car;
+        }
+
+        editor->saves[i].allcars = 0;
+        editor->saves[i].alltracks = 0;
+        editor->saves[i].goldtrophies = 0;
+    }
+}
+
+void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
     if(editor->size >= RAW_SAVE_SIZE) {
         if(memcmp(editor->data, RAW_MAGIC, sizeof(RAW_MAGIC) - 1) == 0) {
-            editor->saveoffsets = (size_t*) malloc(sizeof(size_t));
-            editor->format = RAW;
+            editor->saves = (NFSHSSave*) malloc(sizeof(NFSHSSave));
 
-            if(editor->saveoffsets) {
-                editor->saveoffsets[0] = 0;
+            if(editor->saves) {
+                editor->format = "RAW";
+                NFSHSSave save;
+                save.start = 0;
+                save.serial = NULL;
+                editor->saves[0] = save;
                 editor->savecount = 1;
+                NFSHSSaveEditor_parseinfo(editor);
             }
 
             return;
@@ -203,12 +255,16 @@ static void parse(NFSHSSaveEditor* editor) {
 
     if(editor->size >= SC_HEADER_SIZE + RAW_SAVE_SIZE) {
         if(memcmp(editor->data, SC_MAGIC, sizeof(SC_MAGIC) - 1) == 0) {
-            editor->saveoffsets = (size_t*) malloc(sizeof(size_t));
-            editor->format = SC;
+            editor->saves = (NFSHSSave*) malloc(sizeof(NFSHSSave));
 
-            if(editor->saveoffsets) {
-                editor->saveoffsets[0] = SC_HEADER_SIZE;
+            if(editor->saves) {
+                editor->format = "SC";
+                NFSHSSave save;
+                save.start = SC_HEADER_SIZE;
+                save.serial = NULL;
+                editor->saves[0] = save;
                 editor->savecount = 1;
+                NFSHSSaveEditor_parseinfo(editor);
             }
 
             return;
@@ -219,328 +275,145 @@ static void parse(NFSHSSaveEditor* editor) {
         if(memcmp(editor->data, PSV_MAGIC, sizeof(PSV_MAGIC) - 1) == 0) {
             char serial[SERIAL_SIZE + 1];
             serial[SERIAL_SIZE] = '\0';
+
             memcpy(serial, editor->data + 102, sizeof(serial) - 1);
+            const int seridx = NFSHSSaveEditor_findstr(serial, NFSHSSaveEditor_serials, ARRAY_SIZE(NFSHSSaveEditor_serials));
 
-            if(find(serial, serials, ARRAY_SIZE(serials)) > -1) {
-                editor->saveoffsets = (size_t*) malloc(sizeof(size_t));
-                editor->format = PSV;
+            if(seridx > -1) {
+                editor->saves = (NFSHSSave*) malloc(sizeof(NFSHSSave));
 
-                if(editor->saveoffsets) {
-                    editor->saveoffsets[0] = PSV_HEADER_SIZE + SC_HEADER_SIZE;
+                if(editor->saves) {
+                    editor->format = "PSV";
+                    NFSHSSave save;
+                    save.start = PSV_HEADER_SIZE + SC_HEADER_SIZE;
+                    save.serial = NFSHSSaveEditor_serials[seridx];
+                    editor->saves[0] = save;
                     editor->savecount = 1;
+                    NFSHSSaveEditor_parseinfo(editor);
                 }
-
-                return;
             }
+
+            return;
         }
     }
 
-    long gmeshift = -1;
+    size_t gmeshift = 0;
+    const char* format = NULL;
+
     if(editor->size >= MC_SIZE && memcmp(editor->data, MC_MAGIC, sizeof(MC_MAGIC) - 1) == 0) {
-       editor->format = MC;
        gmeshift = 0;
+       format = "MC";
     }
-    if(editor->size >= GME_HEADER_SIZE + MC_SIZE && memcmp(editor->data, GME_MAGIC, sizeof(GME_MAGIC) - 1) == 0) {
-       editor->format = GME;
+    else if(editor->size >= GME_HEADER_SIZE + MC_SIZE && memcmp(editor->data, GME_MAGIC, sizeof(GME_MAGIC) - 1) == 0) {
        gmeshift = GME_HEADER_SIZE;
+       format = "GME";
     }
 
-    if(gmeshift != -1) {
-        long temp[MC_BLOCK_COUNT];
-        size_t n = 0;
+    if(format) {
+        long starts[MC_BLOCK_COUNT];
+        int serials[MC_BLOCK_COUNT];
 
+        size_t n = 0;
         char serial[SERIAL_SIZE + 1];
         serial[SERIAL_SIZE] = '\0';
 
         for(size_t i = 1; i < MC_BLOCK_COUNT; i++) {
-            temp[i] = -1;
+            starts[i] = -1;
+            serials[i] = -1;
 
-            uint8_t flag = editor->data[gmeshift + MC_HEADER_SIZE * i];
             memcpy(serial, editor->data + gmeshift + MC_HEADER_SIZE * i + 12, sizeof(serial) - 1);
+            const int seridx = NFSHSSaveEditor_findstr(serial, NFSHSSaveEditor_serials, ARRAY_SIZE(NFSHSSaveEditor_serials));
 
-            if(flag == 0x51 && find(serial, serials, ARRAY_SIZE(serials)) > -1) {
-                temp[i] = gmeshift + MC_BLOCK_SIZE * i + SC_HEADER_SIZE;
+            if(editor->data[gmeshift + MC_HEADER_SIZE * i] == 0x51 && seridx > -1) {
+                starts[i] = gmeshift + MC_BLOCK_SIZE * i + SC_HEADER_SIZE;
+                serials[i] = seridx;
                 n++;
             }
         }
 
         if(n > 0) {
-            editor->saveoffsets = (size_t*) malloc(n * sizeof(size_t));
+            editor->saves = (NFSHSSave*) malloc(n * sizeof(NFSHSSave));
 
-            if(editor->saveoffsets) {
+            if(editor->saves) {
+                editor->format = format;
+
+                size_t j = 0;
+                NFSHSSave save;
+
+                for(size_t i = 1; i < MC_BLOCK_COUNT; i++) {
+                    if(starts[i] > -1 && serials[i] > -1) {
+                        save.start = (size_t) starts[i];
+                        save.serial = NFSHSSaveEditor_serials[serials[i]];
+                        editor->saves[j++] = save;
+                    }
+                }
+
                 editor->savecount = n;
-                size_t k = 0;
-
-                for(size_t i = 1; i < MC_BLOCK_COUNT; i++)
-                    if(temp[i] != -1) editor->saveoffsets[k++] = (size_t) temp[i];
+                NFSHSSaveEditor_parseinfo(editor);
             }
         }
     }
 }
 
-NFSHSSaveEditor init(const char* path) {
-    NFSHSSaveEditor editor;
-    editor.path = path;
-    editor.data = NULL;
-    editor.size = 0;
-    editor.saveoffsets = NULL;
-    editor.savecount = 0;
-    editor.format = UNK;
-    if(!path) return editor;
+void NFSHSSaveEditor_init(NFSHSSaveEditor* editor, const char* path) {
+    if(!editor || !path) return;
 
-    FILE* fp = fopen(editor.path, "rb");
-    if(!fp) return editor;
+    FILE* fp = fopen(path, "rb");
+    if(!fp) return;
 
     fseek(fp, 0, SEEK_END);
 
-    long fs = ftell(fp);
+    const long fs = ftell(fp);
     if(fs <= 0) {
         fclose(fp);
-        return editor;
+        return;
     }
 
-    editor.data = (uint8_t*) malloc(fs * sizeof(uint8_t));
-    if(!editor.data) {
+    uint8_t* data = (uint8_t*) malloc(((size_t) fs) * sizeof(uint8_t));
+    if(!data) {
         fclose(fp);
-        return editor;
+        return;
     }
 
     fseek(fp, 0, SEEK_SET);
 
-    if(fread(editor.data, sizeof(uint8_t), (size_t) fs, fp) != (size_t) fs) {
+    if(fread(data, sizeof(uint8_t), (size_t) fs, fp) != (size_t) fs) {
         fclose(fp);
-        free(editor.data);
-        editor.data = NULL;
-        return editor;
+        free(data);
+        return;
     }
 
-    editor.size = (size_t) fs;
     fclose(fp);
 
-    parse(&editor);
-    return editor;
+    NFSHSSaveEditor_clear(editor);
+    editor->path = path;
+    editor->data = data;
+    editor->size = (size_t) fs;
+    NFSHSSaveEditor_parse(editor);
 }
 
-void print(NFSHSSaveEditor* editor) {
-    switch(editor->format) {
-        case UNK:
-            printf("Format: unknown\n");
-            break;
-
-        case RAW:
-            printf("Format: RAW\n");
-            break;
-
-        case SC:
-            printf("Format: SC\n");
-            break;
-
-        case MC:
-            printf("Format: MC\n");
-            break;
-
-        case PSV:
-            printf("Format: PSV\n");
-            break;
-
-        case GME:
-            printf("Format: GME\n");
-            break;
-    }
-
-    for(size_t k = 0; k < editor->savecount; k++) {
-        long pos = editor->saveoffsets[k] + LANGUAGE_START;
-        int langidx = editor->data[pos] < ARRAY_SIZE(languages) ? editor->data[pos] : -1;
-
-       if(langidx > -1)
-           printf("Language at %ld: %s\n", pos, languages[langidx]);
-       else
-           printf("Language at %ld: ?\n", pos);
-
-        pos = editor->saveoffsets[k] + PLAYER_NAME_START;
-        char name[PLAYER_NAME_SIZE + 1];
-        name[PLAYER_NAME_SIZE] = '\0';
-        memcpy(name, editor->data + pos, sizeof(name) - 1);
-        printf("Player name at %ld: %s\n", pos, name);
-
-        pos = editor->saveoffsets[k] + CAR_INFO_START;
-        printf("Owned cars at %ld:\n", pos);
-
-        for(size_t i = 0; i < OWNED_CAR_SLOT_COUNT; i++) {
-            if(editor->data[pos + OWNED_CAR_SLOT_SIZE * i] == 0xFF) break;
-
-            int caridx = editor->data[pos + OWNED_CAR_SLOT_SIZE * i] < ARRAY_SIZE(cars) ? editor->data[pos + OWNED_CAR_SLOT_SIZE * i] : -1;
-            int upgidx = -1;
-            int color = editor->data[pos + OWNED_CAR_SLOT_SIZE * i + 2];
-
-            if(caridx > -1 && cars[caridx])
-                printf("slot %d | car %s | ", (int) i, cars[caridx]);
-            else
-                printf("slot %d | car ? | ", (int) i);
-
-            for(size_t j = 0; j < ARRAY_SIZE(upgradedata); j++)
-                if(editor->data[pos + OWNED_CAR_SLOT_SIZE * i + 1] == upgradedata[j]) upgidx = (int) j;
-
-            if(upgidx > -1) printf("upgrade %d | ", upgidx);
-            else printf("upgrade ? | ");
-
-            printf("color %d\n", color);
-        }
-
-        pos = editor->saveoffsets[k] + TOURNAMENT_INFO_START;
-        printf("Money at %ld: %d\n", pos, toint(editor->data + pos));
-
-        uint8_t crc[sizeof(uint32_t)];
-
-        pos = editor->saveoffsets[k] + FRONTEND_CRC_START;
-        getcrc16(editor->data + editor->saveoffsets[k] + FRONTEND_START, FRONTEND_SIZE, crc);
-
-        if(memcmp(editor->data + pos, crc, sizeof(crc)) == 0)
-            printf("Frontend CRC at %ld: valid\n", pos);
-        else
-            printf("Frontend CRC at %ld: invalid\n", pos);
-
-        pos = editor->saveoffsets[k] + CAR_INFO_CRC_START;
-        getcrc16(editor->data + editor->saveoffsets[k] + CAR_INFO_START, CAR_INFO_SIZE, crc);
-
-        if(memcmp(editor->data + pos, crc, sizeof(crc)) == 0)
-            printf("Car info CRC at %ld: valid\n", pos);
-        else
-            printf("Car info CRC at %ld: invalid\n", pos);
-
-        pos = editor->saveoffsets[k] + TRACK_INFO_CRC_START;
-        getcrc16(editor->data + editor->saveoffsets[k] + TRACK_INFO_START, TRACK_INFO_SIZE, crc);
-
-        if(memcmp(editor->data + pos, crc, sizeof(crc)) == 0)
-            printf("Track info CRC at %ld: valid\n", pos);
-        else
-            printf("Track info CRC at %ld: invalid\n", pos);
-
-        pos = editor->saveoffsets[k] + TOURNAMENT_INFO_CRC_START;
-        getcrc16(editor->data + editor->saveoffsets[k] + TOURNAMENT_INFO_START, TOURNAMENT_INFO_SIZE, crc);
-
-        if(memcmp(editor->data + pos, crc, sizeof(crc)) == 0)
-            printf("Tournament info CRC at %ld: valid\n", pos);
-        else
-            printf("Tournament info CRC at %ld: invalid\n", pos);
-
-        pos = editor->saveoffsets[k] + RECORD_INFO_CRC_START;
-        getcrc16(editor->data + editor->saveoffsets[k] + RECORD_INFO_START, RECORD_INFO_SIZE, crc);
-
-        if(memcmp(editor->data + pos, crc, sizeof(crc)) == 0)
-            printf("Record info CRC at %ld: valid\n", pos);
-        else
-            printf("Record info CRC at %ld: invalid\n", pos);
-
-        printf("\n");
-    }
-}
-
-void fix(NFSHSSaveEditor* editor) {
+void NFSHSSaveEditor_fixcrc16(NFSHSSaveEditor* editor) {
     uint8_t crc[sizeof(uint32_t)];
-    for(size_t k = 0; k < editor->savecount; k++) {
-        getcrc16(editor->data + editor->saveoffsets[k] + FRONTEND_START, FRONTEND_SIZE, crc);
-        memcpy(editor->data + editor->saveoffsets[k] + FRONTEND_CRC_START, crc, sizeof(crc));
 
-        getcrc16(editor->data + editor->saveoffsets[k] + CAR_INFO_START, CAR_INFO_SIZE, crc);
-        memcpy(editor->data + editor->saveoffsets[k] + CAR_INFO_CRC_START, crc, sizeof(crc));
+    for(size_t i = 0; i < editor->savecount; i++) {
+        NFSHSSaveEditor_getcrc16(editor->data + editor->saves[i].start + FRONTEND_START, FRONTEND_SIZE, crc);
+        memcpy(editor->data + editor->saves[i].start + FRONTEND_CRC_START, crc, sizeof(crc));
 
-        getcrc16(editor->data + editor->saveoffsets[k] + TRACK_INFO_START, TRACK_INFO_SIZE, crc);
-        memcpy(editor->data + editor->saveoffsets[k] + TRACK_INFO_CRC_START, crc, sizeof(crc));
+        NFSHSSaveEditor_getcrc16(editor->data + editor->saves[i].start + CAR_INFO_START, CAR_INFO_SIZE, crc);
+        memcpy(editor->data + editor->saves[i].start + CAR_INFO_CRC_START, crc, sizeof(crc));
 
-        getcrc16(editor->data + editor->saveoffsets[k] + TOURNAMENT_INFO_START, TOURNAMENT_INFO_SIZE, crc);
-        memcpy(editor->data + editor->saveoffsets[k] + TOURNAMENT_INFO_CRC_START, crc, sizeof(crc));
+        NFSHSSaveEditor_getcrc16(editor->data + editor->saves[i].start + TRACK_INFO_START, TRACK_INFO_SIZE, crc);
+        memcpy(editor->data + editor->saves[i].start + TRACK_INFO_CRC_START, crc, sizeof(crc));
 
-        getcrc16(editor->data + editor->saveoffsets[k] + RECORD_INFO_START, RECORD_INFO_SIZE, crc);
-        memcpy(editor->data + editor->saveoffsets[k] + RECORD_INFO_CRC_START, crc, sizeof(crc));
+        NFSHSSaveEditor_getcrc16(editor->data + editor->saves[i].start + TOURNAMENT_INFO_START, TOURNAMENT_INFO_SIZE, crc);
+        memcpy(editor->data + editor->saves[i].start + TOURNAMENT_INFO_CRC_START, crc, sizeof(crc));
+
+        NFSHSSaveEditor_getcrc16(editor->data + editor->saves[i].start + RECORD_INFO_START, RECORD_INFO_SIZE, crc);
+        memcpy(editor->data + editor->saves[i].start + RECORD_INFO_CRC_START, crc, sizeof(crc));
     }
 }
 
-void update(NFSHSSaveEditor* editor, const TYPE type, const int32_t* val, char* str) {
-    switch(type) {
-        case LANGUAGE: {
-            if(!str) return;
-            lower(str);
-
-            int langidx = find(str, languages, ARRAY_SIZE(languages));
-            if(langidx > -1) {
-                for(size_t k = 0; k < editor->savecount; k++)
-                    editor->data[editor->saveoffsets[k] + LANGUAGE_START] = (uint8_t) langidx;
-            }
-            else return;
-
-            break;
-        }
-
-        case CAR: {
-            if(!val || !str) return;
-            lower(str);
-
-            int caridx = find(str, cars, ARRAY_SIZE(cars));
-            int upgidx = val[0] >= 0 && val[0] < (int) ARRAY_SIZE(upgradedata) ? val[0] : -1;
-
-            if(caridx > -1 && upgidx > -1) {
-                for(size_t k = 0; k < editor->savecount; k++) {
-                    int slotidx = -1;
-
-                    for(size_t i = 0; i < OWNED_CAR_SLOT_COUNT; i++) {
-                        if(editor->data[editor->saveoffsets[k] + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * i] == 0xFF) {
-                            slotidx = (int) i;
-                            break;
-                        }
-                    }
-                    if(slotidx == -1) slotidx = 0;
-
-                    editor->data[editor->saveoffsets[k] + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * slotidx] = (uint8_t) caridx;
-                    editor->data[editor->saveoffsets[k] + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * slotidx + 1] = upgradedata[upgidx];
-                    editor->data[editor->saveoffsets[k] + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * slotidx + 2] = (uint8_t) val[1];
-                }
-            }
-            else return;
-
-            break;
-        }
-
-        case CARS: {
-            for(size_t k = 0; k < editor->savecount; k++) {
-                memset(editor->data + editor->saveoffsets[k] + CAR_AVAILABILITY_START, unlockedcardata, CAR_AVAILABILITY_SIZE);
-                memset(editor->data + editor->saveoffsets[k] + CAR_VISIBILITY_START, unlockedcardata, CAR_VISIBILITY_SIZE);
-            }
-
-            break;
-        }
-
-        case TRACKS: {
-            for(size_t k = 0; k < editor->savecount; k++)
-                memcpy(editor->data + editor->saveoffsets[k] + TRACK_INFO_START, alltracksdata, ARRAY_SIZE(alltracksdata));
-
-            break;
-        }
-
-        case MONEY: {
-            if(!val) return;
-
-            uint8_t buf[sizeof(uint32_t)];
-            fromint(val[0], buf);
-
-            for(size_t k = 0; k < editor->savecount; k++)
-                memcpy(editor->data + editor->saveoffsets[k] + TOURNAMENT_INFO_START, buf, sizeof(buf));
-
-            break;
-        }
-
-        case TROPHIES: {
-            for(size_t k = 0; k < editor->savecount; k++)
-                memset(editor->data + editor->saveoffsets[k] + TROPHIES_START, goldtrophydata, TROPHIES_SIZE);
-
-            break;
-        }
-    }
-
-    fix(editor);
-}
-
-void save(NFSHSSaveEditor* editor) {
+void NFSHSSaveEditor_write(NFSHSSaveEditor* editor) {
     FILE* fp = fopen(editor->path, "wb");
     if(fp) {
         fwrite(editor->data, sizeof(uint8_t), editor->size, fp);
@@ -548,4 +421,76 @@ void save(NFSHSSaveEditor* editor) {
     }
 }
 
-#endif
+void NFSHSSaveEditor_updatelang(NFSHSSaveEditor* editor, const size_t saveidx, const char* lan) {
+    if(saveidx >= editor->savecount) return;
+    const int lanidx = NFSHSSaveEditor_findstr(lan, NFSHSSaveEditor_languages, ARRAY_SIZE(NFSHSSaveEditor_languages));
+    editor->saves[saveidx].language = lanidx > -1 ? NFSHSSaveEditor_languages[lanidx] : NFSHSSaveEditor_languages[0];
+}
+
+void NFSHSSaveEditor_updatemoney(NFSHSSaveEditor* editor, const size_t saveidx, const int32_t money) {
+    if(saveidx >= editor->savecount) return;
+    editor->saves[saveidx].money = money;
+}
+
+void NFSHSSaveEditor_updateownedcar(NFSHSSaveEditor* editor, const size_t saveidx, const size_t carslotidx, const char* model, const uint8_t upgrade, const uint8_t color) {
+    if(saveidx >= editor->savecount || carslotidx >= OWNED_CAR_SLOT_COUNT) return;
+
+    const int modidx = NFSHSSaveEditor_findstr(model, NFSHSSaveEditor_models, ARRAY_SIZE(NFSHSSaveEditor_models));
+    const uint8_t upgidx = upgrade < ARRAY_SIZE(NFSHSSaveEditor_upgrades) ? upgrade : 0;
+    const uint8_t colidx = color;
+
+    editor->saves[saveidx].ownedcars[carslotidx].model = modidx > -1 ? NFSHSSaveEditor_models[modidx] : NULL;
+    editor->saves[saveidx].ownedcars[carslotidx].upgrade = modidx > -1 ? upgidx : 0;
+    editor->saves[saveidx].ownedcars[carslotidx].color = modidx > -1 ? colidx : 0;
+}
+
+void NFSHSSaveEditor_unlockcars(NFSHSSaveEditor* editor, const size_t saveidx) {
+    if(saveidx >= editor->savecount) return;
+    editor->saves[saveidx].allcars = 1;
+}
+
+void NFSHSSaveEditor_unlocktracks(NFSHSSaveEditor* editor, const size_t saveidx) {
+    if(saveidx >= editor->savecount) return;
+    editor->saves[saveidx].alltracks = 1;
+}
+
+void NFSHSSaveEditor_setgoldtrophies(NFSHSSaveEditor* editor, const size_t saveidx) {
+    if(saveidx >= editor->savecount) return;
+    editor->saves[saveidx].goldtrophies = 1;
+}
+
+void NFSHSSaveEditor_update(NFSHSSaveEditor* editor) {
+    uint8_t buf[sizeof(uint32_t)];
+
+    for(size_t i = 0; i < editor->savecount; i++) {
+        const int lanidx = NFSHSSaveEditor_findstr(editor->saves[i].language, NFSHSSaveEditor_languages, ARRAY_SIZE(NFSHSSaveEditor_languages));
+        editor->data[editor->saves[i].start + LANGUAGE_START] = lanidx > -1 ? (uint8_t) lanidx : 0;
+
+        NFSHSSaveEditor_fromint(editor->saves[i].money, buf);
+        memcpy(editor->data + editor->saves[i].start + TOURNAMENT_INFO_START, buf, sizeof(buf));
+
+        for(size_t j = 0; j < OWNED_CAR_SLOT_COUNT; j++) {
+            const int modidx = NFSHSSaveEditor_findstr(editor->saves[i].ownedcars[j].model, NFSHSSaveEditor_models, ARRAY_SIZE(NFSHSSaveEditor_models));
+            const uint8_t upgidx = editor->saves[i].ownedcars[j].upgrade < ARRAY_SIZE(NFSHSSaveEditor_upgrades) ? editor->saves[i].ownedcars[j].upgrade : 0;
+            const uint8_t colidx = editor->saves[i].ownedcars[j].color;
+
+            editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j] = modidx > -1 ? (uint8_t) modidx : EMPTY_CAR_SLOT_FLAG;
+            editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j + 1] = modidx > -1 ? NFSHSSaveEditor_upgrades[upgidx] : NFSHSSaveEditor_upgrades[0];
+            editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j + 2] = modidx > -1 ? colidx : 0;
+        }
+
+        if(editor->saves[i].allcars) {
+            memset(editor->data + editor->saves[i].start + CAR_AVAILABILITY_START, NFSHSSaveEditor_unlockedcardata, CAR_AVAILABILITY_SIZE);
+            memset(editor->data + editor->saves[i].start + CAR_VISIBILITY_START, NFSHSSaveEditor_unlockedcardata, CAR_VISIBILITY_SIZE);
+        }
+
+        if(editor->saves[i].alltracks)
+            memcpy(editor->data + editor->saves[i].start + TRACK_INFO_START, NFSHSSaveEditor_alltracksdata, ARRAY_SIZE(NFSHSSaveEditor_alltracksdata));
+
+        if(editor->saves[i].goldtrophies)
+            memset(editor->data + editor->saves[i].start + TROPHIES_START, NFSHSSaveEditor_goldtrophydata, TROPHIES_SIZE);
+    }
+
+    NFSHSSaveEditor_fixcrc16(editor);
+    NFSHSSaveEditor_write(editor);
+}
