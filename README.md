@@ -1,5 +1,5 @@
 # Need for Speed High Stakes/Road Challenge Save Editor
-This Win32 GUI tool allows users to read and edit save files for the PlayStation game Need for Speed High Stakes/Road Challenge. It supports US, EU, AU saves.
+This GUI tool allows users to read and edit save files for the PlayStation game Need for Speed High Stakes/Road Challenge. It supports US, EU, AU saves.
 
 It supports the formats RAW (raw save bytes), SC (PS1 save slot), MC (PS1 memory card image), GME (DexDrive), PSV (PS1 save image for PS3).
 
