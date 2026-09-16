@@ -93,7 +93,11 @@ void InitGui(HWND hWnd) {
     EnableWindow(h, FALSE);
 
     CreateWindowA("STATIC", "Color:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, 300, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_NUMBER, 100, 300, 150, 20, hWnd, (HMENU) OWNED_CAR_COLOR, NULL, NULL);
+    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, 300, 150, 200, hWnd, (HMENU) OWNED_CAR_COLOR, NULL, NULL);
+    for(size_t i = 0; i < OWNED_CAR_COLOR_COUNT; i++) {
+        snprintf(buf, sizeof(buf), "%d", (int) i);
+        SendMessage(h, CB_ADDSTRING, 0, (LPARAM) buf);
+    }
     EnableWindow(h, FALSE);
 
     h = CreateWindowA("BUTTON", "All cars", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10, 330, 100, 20, hWnd, (HMENU) ALL_CARS, NULL, NULL);
@@ -146,7 +150,7 @@ void ClearGui(HWND hWnd) {
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, OWNED_CAR_COLOR);
-    SetWindowTextA(h, "");
+    SendMessage(h, CB_SETCURSEL, (WPARAM) -1, 0);
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, ALL_CARS);
@@ -203,7 +207,7 @@ void PrintSaveById(HWND hWnd, NFSHSSaveEditor* editor, const BOOL chsave, const 
 
         h = GetDlgItem(hWnd, OWNED_CAR_COLOR);
         EnableWindow(h, TRUE);
-        SetDlgItemInt(hWnd, OWNED_CAR_COLOR, editor->saves[saveidx].ownedcars[carslotidx].color, FALSE);
+        SendMessage(h, CB_SETCURSEL, (WPARAM) editor->saves[saveidx].ownedcars[carslotidx].color, 0);
     }
 }
 
@@ -300,17 +304,12 @@ void UpdateSave(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             LRESULT carslotidx = SendDlgItemMessageA(hWnd, OWNED_CAR_SLOT, CB_GETCURSEL, 0, 0);
             LRESULT modidx = SendDlgItemMessageA(hWnd, OWNED_CAR_MODEL, CB_GETCURSEL, 0, 0);
             LRESULT upgrade = SendDlgItemMessageA(hWnd, OWNED_CAR_UPGRADE, CB_GETCURSEL, 0, 0);
-
-            char colorbuf[3];
-            GetDlgItemTextA(hWnd, OWNED_CAR_COLOR, colorbuf, sizeof(colorbuf));
-            char* end = NULL;
-            uint8_t color = strtoul(colorbuf, &end, 10);
+            LRESULT color = SendDlgItemMessageA(hWnd, OWNED_CAR_COLOR, CB_GETCURSEL, 0, 0);
 
             char model[20];
             SendDlgItemMessageA(hWnd, OWNED_CAR_MODEL, CB_GETLBTEXT, (WPARAM) modidx, (LPARAM) model);
 
-            if(end != colorbuf && *end == '\0')
-                NFSHSSaveEditor_updateownedcar(editor, saveidx, carslotidx, (const char*) model, upgrade, color);
+            NFSHSSaveEditor_updateownedcar(editor, saveidx, carslotidx, (const char*) model, upgrade, color);
         }
         break;
 
@@ -358,11 +357,11 @@ void ProcessCmd(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
         case PLAYER_LANGUAGE:
         case OWNED_CAR_MODEL:
         case OWNED_CAR_UPGRADE:
+        case OWNED_CAR_COLOR:
             if(HIWORD(wParam) == CBN_SELCHANGE) UpdateSave(hWnd, wParam, editor);
             break;
 
         case MONEY:
-        case OWNED_CAR_COLOR:
             if(HIWORD(wParam) == EN_CHANGE) UpdateSave(hWnd, wParam, editor);
             break;
 

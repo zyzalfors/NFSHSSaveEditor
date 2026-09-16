@@ -36,12 +36,13 @@
 
 #define OWNED_CAR_SLOT_SIZE 4
 #define OWNED_CAR_SLOT_COUNT 32
+#define OWNED_CAR_COLOR_COUNT 16
 #define EMPTY_CAR_SLOT_FLAG 0xff
 
 #define CAR_AVAILABILITY_START 1240
-#define CAR_AVAILABILITY_SIZE 45
+#define CAR_AVAILABILITY_SIZE 48
 #define CAR_VISIBILITY_START 1288
-#define CAR_VISIBILITY_SIZE 45
+#define CAR_VISIBILITY_SIZE 48
 
 #define TRACK_INFO_START 1336
 #define TRACK_INFO_SIZE 16
@@ -88,13 +89,10 @@ typedef struct {
     size_t savecount;
 } NFSHSSaveEditor;
 
-const char* NFSHSSaveEditor_serials[] = {"SLUS-00826", "SLES-01788", "SLES-01789", "SLES-01790"};
-const char* NFSHSSaveEditor_languages[] = {"EN", "DE", "FR", "SP", "IT", "SW"};
-const char* NFSHSSaveEditor_models[] = {"SLK", "Z3", "VT", "Falcon", "Camaro", "Firebird", "DB7", "XKR", "M5", "Corvette", "550", "911", "F50", "Diablo", "CLK GTR", "F1 GTR", "Race 911", "Race VT", "Race Corvette", "Phantom", "Titan", NULL, "Police Caprice", "Police VT", "Police M5", "Police Corvette", "Police 911", "Police Diablo", "Jailbird"};
+const char* NFSHSSaveEditor_serials[] = {"SLUS-00826", "SLES-01876", "SLES-01788", "SLES-01789", "SLES-01790"};
+const char* NFSHSSaveEditor_languages[] = {"EN/JA", "DE", "FR", "ES", "IT", "SV"};
+const char* NFSHSSaveEditor_models[] = {"SLK", "Z3", "VT/Skyline", "Falcon", "Camaro", "Firebird", "DB7", "XKR", "M5", "Corvette", "550", "911", "F50", "Diablo", "CLK GTR", "F1 GTR", "Race 911", "Race VT/Skyline", "Race Corvette", "Phantom", "Titan", "Titan?", "Police Caprice", "Police VT", "Police M5", "Police Corvette", "Police 911", "Police Diablo", "Jailbird", "Traffic 1", "Traffic 2", "Traffic 3", "Traffic 4", "Traffic 5", "Traffic 6", "Traffic 7", "Traffic 8", "Traffic 9", "Traffic 10", "Traffic 11", "Traffic 12", "Traffic 13", "Traffic 14", "Traffic 15", "Traffic 16", "Traffic 17", "Traffic 18", "Traffic 19", "Traffic 20", "Traffic 21"};
 const uint8_t NFSHSSaveEditor_upgrades[] = {0x00, 0x01, 0x03, 0x07};
-const uint8_t NFSHSSaveEditor_unlockedcardata = 0x01;
-const uint8_t NFSHSSaveEditor_alltracksdata[] = {0x01, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
-const uint8_t NFSHSSaveEditor_goldtrophydata = 0x01;
 
 const uint8_t NFSHSSaveEditor_table1[256] = {
     0x00, 0xc1, 0x81, 0x40, 0x01, 0xc0, 0x80, 0x41, 0x01, 0xc0, 0x80, 0x41, 0x00, 0xc1, 0x81, 0x40,
@@ -135,8 +133,8 @@ const uint8_t NFSHSSaveEditor_table2[256] = {
 };
 
 int NFSHSSaveEditor_findstr(const char* s, const char* list[], const size_t n) {
-    for(size_t i = 0; i < n; i++)
-        if(s && list[i] && strcmp(s, list[i]) == 0) return (int) i;
+    for(size_t i = 0; i < n && s; i++)
+        if(strcmp(s, list[i]) == 0) return (int) i;
 
     return -1;
 }
@@ -196,6 +194,7 @@ void NFSHSSaveEditor_getcrc16(const uint8_t buf[], int size, uint8_t crc[]) {
 }
 
 void NFSHSSaveEditor_clear(NFSHSSaveEditor* editor) {
+    if(!editor) return;
     if(editor->data) free(editor->data);
     if(editor->saves) free(editor->saves);
     memset(editor, 0, sizeof(NFSHSSaveEditor));
@@ -222,7 +221,8 @@ void NFSHSSaveEditor_parseinfo(NFSHSSaveEditor* editor) {
                 const int upgidx = NFSHSSaveEditor_findbyte(editor->data[pos + OWNED_CAR_SLOT_SIZE * j + 1], NFSHSSaveEditor_upgrades, ARRAY_SIZE(NFSHSSaveEditor_upgrades));
                 if(upgidx > -1) car.upgrade = (uint8_t) upgidx;
 
-                car.color = editor->data[pos + OWNED_CAR_SLOT_SIZE * j + 2];
+                const uint8_t colidx = editor->data[pos + OWNED_CAR_SLOT_SIZE * j + 2];
+                if(colidx < OWNED_CAR_COLOR_COUNT) car.color = colidx;
             }
 
             editor->saves[i].ownedcars[j] = car;
@@ -437,7 +437,7 @@ void NFSHSSaveEditor_updateownedcar(NFSHSSaveEditor* editor, const size_t saveid
 
     const int modidx = NFSHSSaveEditor_findstr(model, NFSHSSaveEditor_models, ARRAY_SIZE(NFSHSSaveEditor_models));
     const uint8_t upgidx = upgrade < ARRAY_SIZE(NFSHSSaveEditor_upgrades) ? upgrade : 0;
-    const uint8_t colidx = color;
+    const uint8_t colidx = color < OWNED_CAR_COLOR_COUNT ? color : 0;
 
     editor->saves[saveidx].ownedcars[carslotidx].model = modidx > -1 ? NFSHSSaveEditor_models[modidx] : NULL;
     editor->saves[saveidx].ownedcars[carslotidx].upgrade = modidx > -1 ? upgidx : 0;
@@ -460,6 +460,7 @@ void NFSHSSaveEditor_setgoldtrophies(NFSHSSaveEditor* editor, const size_t savei
 }
 
 void NFSHSSaveEditor_update(NFSHSSaveEditor* editor) {
+    if(!editor || !editor->data || !editor->path || editor->savecount == 0) return;
     uint8_t buf[sizeof(uint32_t)];
 
     for(size_t i = 0; i < editor->savecount; i++) {
@@ -472,7 +473,7 @@ void NFSHSSaveEditor_update(NFSHSSaveEditor* editor) {
         for(size_t j = 0; j < OWNED_CAR_SLOT_COUNT; j++) {
             const int modidx = NFSHSSaveEditor_findstr(editor->saves[i].ownedcars[j].model, NFSHSSaveEditor_models, ARRAY_SIZE(NFSHSSaveEditor_models));
             const uint8_t upgidx = editor->saves[i].ownedcars[j].upgrade < ARRAY_SIZE(NFSHSSaveEditor_upgrades) ? editor->saves[i].ownedcars[j].upgrade : 0;
-            const uint8_t colidx = editor->saves[i].ownedcars[j].color;
+            const uint8_t colidx = editor->saves[i].ownedcars[j].color < OWNED_CAR_COLOR_COUNT ? editor->saves[i].ownedcars[j].color : 0;
 
             editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j] = modidx > -1 ? (uint8_t) modidx : EMPTY_CAR_SLOT_FLAG;
             editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j + 1] = modidx > -1 ? NFSHSSaveEditor_upgrades[upgidx] : NFSHSSaveEditor_upgrades[0];
@@ -480,15 +481,15 @@ void NFSHSSaveEditor_update(NFSHSSaveEditor* editor) {
         }
 
         if(editor->saves[i].unlockallcars) {
-            memset(editor->data + editor->saves[i].start + CAR_AVAILABILITY_START, NFSHSSaveEditor_unlockedcardata, CAR_AVAILABILITY_SIZE);
-            memset(editor->data + editor->saves[i].start + CAR_VISIBILITY_START, NFSHSSaveEditor_unlockedcardata, CAR_VISIBILITY_SIZE);
+            memset(editor->data + editor->saves[i].start + CAR_AVAILABILITY_START, 0x01, CAR_AVAILABILITY_SIZE);
+            memset(editor->data + editor->saves[i].start + CAR_VISIBILITY_START, 0x01, CAR_VISIBILITY_SIZE);
         }
 
         if(editor->saves[i].unlockalltracks)
-            memcpy(editor->data + editor->saves[i].start + TRACK_INFO_START, NFSHSSaveEditor_alltracksdata, ARRAY_SIZE(NFSHSSaveEditor_alltracksdata));
+            memset(editor->data + editor->saves[i].start + TRACK_INFO_START, 0x01, TRACK_INFO_SIZE);
 
         if(editor->saves[i].setgoldtrophies)
-            memset(editor->data + editor->saves[i].start + TROPHIES_START, NFSHSSaveEditor_goldtrophydata, TROPHIES_SIZE);
+            memset(editor->data + editor->saves[i].start + TROPHIES_START, 0x01, TROPHIES_SIZE);
     }
 
     NFSHSSaveEditor_fixcrc16(editor);
