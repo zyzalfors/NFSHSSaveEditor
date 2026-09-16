@@ -147,7 +147,10 @@ int NFSHSSaveEditor_findbyte(const uint8_t v, const uint8_t list[], const size_t
 }
 
 int32_t NFSHSSaveEditor_toint(const uint8_t buf[]) {
-    return (int32_t) (((uint32_t) buf[0]) | ((uint32_t) buf[1] << 8) | ((uint32_t) buf[2] << 16) | ((uint32_t) buf[3] << 24));
+    uint32_t uv = ((uint32_t) buf[0]) | ((uint32_t) buf[1] << 8) | ((uint32_t) buf[2] << 16) | ((uint32_t) buf[3] << 24);
+    int32_t v = 0;
+    memcpy(&v, &uv, sizeof(int32_t));
+    return v;
 }
 
 void NFSHSSaveEditor_fromint(const int32_t v, uint8_t buf[]) {
