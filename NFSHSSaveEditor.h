@@ -361,7 +361,10 @@ void NFSHSSaveEditor_init(NFSHSSaveEditor* editor, const char* path) {
     FILE* fp = fopen(path, "rb");
     if(!fp) return;
 
-    fseek(fp, 0, SEEK_END);
+    if(fseek(fp, 0, SEEK_END) != 0) {
+        fclose(fp);
+        return;
+    }
 
     const long fs = ftell(fp);
     if(fs <= 0) {
@@ -375,7 +378,11 @@ void NFSHSSaveEditor_init(NFSHSSaveEditor* editor, const char* path) {
         return;
     }
 
-    fseek(fp, 0, SEEK_SET);
+    if(fseek(fp, 0, SEEK_SET) != 0) {
+        fclose(fp);
+        free(data);
+        return;
+    }
 
     if(fread(data, sizeof(uint8_t), (size_t) fs, fp) != (size_t) fs) {
         fclose(fp);
