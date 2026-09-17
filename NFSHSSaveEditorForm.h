@@ -7,6 +7,7 @@
 #define WND_TITLE "NFSHS Save Editor"
 #define WND_WIDTH 350
 #define WND_HEIGHT 390
+#define MAX_BUF_SIZE 21
 
 #define TOOLBAR 1000
 #define OPEN 1001
@@ -68,7 +69,7 @@ void InitGui(HWND hWnd) {
     h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, 180, 150, 20, hWnd, (HMENU) MONEY, NULL, NULL);
     EnableWindow(h, FALSE);
 
-    char buf[3];
+    char buf[MAX_BUF_SIZE];
     CreateWindowA("STATIC", "Car slot:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, 210, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
     h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, 210, 150, 200, hWnd, (HMENU) OWNED_CAR_SLOT, NULL, NULL);
     for(size_t i = 0; i < OWNED_CAR_SLOT_COUNT; i++) {
@@ -230,7 +231,7 @@ void PrintSave(HWND hWnd, NFSHSSaveEditor* editor, const char* path) {
         SetWindowTextA(h, editor->format);
     }
 
-    char savebuf[3];
+    char savebuf[MAX_BUF_SIZE];
     h = GetDlgItem(hWnd, SAVE);
     EnableWindow(h, TRUE);
     SendMessage(h, CB_RESETCONTENT, 0, 0);
@@ -277,7 +278,7 @@ void UpdateSave(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE, CB_GETCURSEL, 0, 0);
             LRESULT lanidx = SendDlgItemMessageA(hWnd, PLAYER_LANGUAGE, CB_GETCURSEL, 0, 0);
 
-            char lan[3];
+            char lan[MAX_BUF_SIZE];
             SendDlgItemMessageA(hWnd, PLAYER_LANGUAGE, CB_GETLBTEXT, (WPARAM) lanidx, (LPARAM) lan);
 
             NFSHSSaveEditor_updatelang(editor, saveidx, lan);
@@ -287,7 +288,7 @@ void UpdateSave(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
         case MONEY: {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE, CB_GETCURSEL, 0, 0);
 
-            char moneybuf[20];
+            char moneybuf[MAX_BUF_SIZE];
             GetDlgItemTextA(hWnd, MONEY, moneybuf, sizeof(moneybuf));
             char* end = NULL;
             int32_t money = strtol(moneybuf, &end, 10);
@@ -306,7 +307,7 @@ void UpdateSave(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             LRESULT upgrade = SendDlgItemMessageA(hWnd, OWNED_CAR_UPGRADE, CB_GETCURSEL, 0, 0);
             LRESULT color = SendDlgItemMessageA(hWnd, OWNED_CAR_COLOR, CB_GETCURSEL, 0, 0);
 
-            char model[20];
+            char model[MAX_BUF_SIZE];
             SendDlgItemMessageA(hWnd, OWNED_CAR_MODEL, CB_GETLBTEXT, (WPARAM) modidx, (LPARAM) model);
 
             NFSHSSaveEditor_updateownedcar(editor, saveidx, carslotidx, (const char*) model, upgrade, color);
@@ -432,7 +433,7 @@ BOOL RegisterMainClass(HINSTANCE hInstance) {
     wc.lpszClassName = WND_CLASS_NAME;
     wc.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    return RegisterClassEx(&wc) != 0;
+    return RegisterClassExA(&wc) != 0;
 }
 
 HWND CreateMainWindow(HINSTANCE hInstance) {
