@@ -5,10 +5,11 @@
 
 #define WND_CLASS_NAME "NFSHSSaveEditor"
 #define WND_TITLE "NFSHS Save Editor"
-#define WND_WIDTH 350
+#define WND_WIDTH 380
 #define WND_HEIGHT 420
 #define WND_Y_POS 30
-#define MAX_BUF_SIZE 21
+#define TEXT_WIDTH 250
+#define MAX_BUF_SIZE 50
 
 #define TOOLBAR 1000
 #define OPEN_BTN 1001
@@ -45,49 +46,49 @@ void InitGui(HWND hWnd) {
     size_t y = WND_Y_POS;
 
     CreateWindowA("STATIC", "Path:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, NULL, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, 150, 20, hWnd, (HMENU) PATH_TXT, NULL, NULL);
+    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, TEXT_WIDTH, 20, hWnd, (HMENU) PATH_TXT, NULL, NULL);
     SendMessage(h, EM_SETREADONLY, TRUE, 0);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
     CreateWindowA("STATIC", "Format:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, NULL, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, 150, 20, hWnd, (HMENU) FORMAT_TXT, NULL, NULL);
+    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, TEXT_WIDTH, 20, hWnd, (HMENU) FORMAT_TXT, NULL, NULL);
     SendMessage(h, EM_SETREADONLY, TRUE, 0);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
     CreateWindowA("STATIC", "Save:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 150, 200, hWnd, (HMENU) SAVE_COMBO, NULL, NULL);
+    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) SAVE_COMBO, NULL, NULL);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
     CreateWindowA("STATIC", "Serial:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, 150, 20, hWnd, (HMENU) SERIAL_TXT, NULL, NULL);
+    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, TEXT_WIDTH, 20, hWnd, (HMENU) SERIAL_TXT, NULL, NULL);
     SendMessage(h, EM_SETREADONLY, TRUE, 0);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
     CreateWindowA("STATIC", "Name:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, 150, 20, hWnd, (HMENU) PLAYER_NAME_TXT, NULL, NULL);
+    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, TEXT_WIDTH, 20, hWnd, (HMENU) PLAYER_NAME_TXT, NULL, NULL);
     SendMessage(h, EM_SETREADONLY, TRUE, 0);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
     CreateWindowA("STATIC", "Language:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 150, 200, hWnd, (HMENU) LANGUAGE_COMBO, NULL, NULL);
+    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) LANGUAGE_COMBO, NULL, NULL);
     for(size_t i = 0; i < ARRAY_SIZE(NFSHSSaveEditor_languages); i++)
         SendMessage(h, CB_ADDSTRING, 0, (LPARAM) NFSHSSaveEditor_languages[i]);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
     CreateWindowA("STATIC", "Money:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, 150, 20, hWnd, (HMENU) MONEY_TXT, NULL, NULL);
+    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, TEXT_WIDTH, 20, hWnd, (HMENU) MONEY_TXT, NULL, NULL);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
     char buf[MAX_BUF_SIZE];
     CreateWindowA("STATIC", "Car slot:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 150, 200, hWnd, (HMENU) OWNED_CAR_SLOT_COMBO, NULL, NULL);
+    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) OWNED_CAR_SLOT_COMBO, NULL, NULL);
     for(size_t i = 0; i < OWNED_CAR_SLOT_COUNT; i++) {
         snprintf(buf, sizeof(buf), "%d", (int) i);
         SendMessage(h, CB_ADDSTRING, 0, (LPARAM) buf);
@@ -96,7 +97,7 @@ void InitGui(HWND hWnd) {
     y += WND_Y_POS;
 
     CreateWindowA("STATIC", "Model:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 150, 200, hWnd, (HMENU) OWNED_CAR_MODEL_COMBO, NULL, NULL);
+    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) OWNED_CAR_MODEL_COMBO, NULL, NULL);
     SendMessage(h, CB_ADDSTRING, 0, (LPARAM) "None");
     for(size_t i = 0; i < ARRAY_SIZE(NFSHSSaveEditor_models); i++)
        if(NFSHSSaveEditor_models[i]) SendMessage(h, CB_ADDSTRING, 0, (LPARAM) NFSHSSaveEditor_models[i]);
@@ -104,7 +105,7 @@ void InitGui(HWND hWnd) {
     y += WND_Y_POS;
 
     CreateWindowA("STATIC", "Upgrade:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 150, 200, hWnd, (HMENU) OWNED_CAR_UPGRADE_COMBO, NULL, NULL);
+    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) OWNED_CAR_UPGRADE_COMBO, NULL, NULL);
     for(size_t i = 0; i < ARRAY_SIZE(NFSHSSaveEditor_upgrades); i++) {
         snprintf(buf, sizeof(buf), "%d", (int) i);
         SendMessage(h, CB_ADDSTRING, 0, (LPARAM) buf);
@@ -113,7 +114,7 @@ void InitGui(HWND hWnd) {
     y += WND_Y_POS;
 
     CreateWindowA("STATIC", "Color:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 150, 200, hWnd, (HMENU) OWNED_CAR_COLOR_COMBO, NULL, NULL);
+    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) OWNED_CAR_COLOR_COMBO, NULL, NULL);
     for(size_t i = 0; i < OWNED_CAR_COLOR_COUNT; i++) {
         snprintf(buf, sizeof(buf), "%d", (int) i);
         SendMessage(h, CB_ADDSTRING, 0, (LPARAM) buf);
