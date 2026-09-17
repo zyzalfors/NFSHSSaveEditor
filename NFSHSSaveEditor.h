@@ -423,12 +423,16 @@ void NFSHSSaveEditor_fixcrc16(NFSHSSaveEditor* editor) {
     }
 }
 
-void NFSHSSaveEditor_write(NFSHSSaveEditor* editor) {
-    FILE* fp = fopen(editor->path, "wb");
+int NFSHSSaveEditor_write(NFSHSSaveEditor* editor, const char* path) {
+    FILE* fp = fopen(path, "wb");
+
     if(fp) {
-        fwrite(editor->data, sizeof(uint8_t), editor->size, fp);
+        size_t n = fwrite(editor->data, sizeof(uint8_t), editor->size, fp);
         fclose(fp);
+        return n == editor->size;
     }
+
+    return 0;
 }
 
 void NFSHSSaveEditor_updatelang(NFSHSSaveEditor* editor, const size_t saveidx, const char* lan) {
@@ -469,8 +473,8 @@ void NFSHSSaveEditor_setgoldtrophies(NFSHSSaveEditor* editor, const size_t savei
     editor->saves[saveidx].setgoldtrophies = 1;
 }
 
-void NFSHSSaveEditor_update(NFSHSSaveEditor* editor) {
-    if(!editor || !editor->data || !editor->path || editor->savecount == 0) return;
+int NFSHSSaveEditor_update(NFSHSSaveEditor* editor, const char* path) {
+    if(!editor || !editor->data || !editor->path || editor->savecount == 0) return 0;
     uint8_t buf[sizeof(uint32_t)];
 
     for(size_t i = 0; i < editor->savecount; i++) {
@@ -503,5 +507,5 @@ void NFSHSSaveEditor_update(NFSHSSaveEditor* editor) {
     }
 
     NFSHSSaveEditor_fixcrc16(editor);
-    NFSHSSaveEditor_write(editor);
+    return NFSHSSaveEditor_write(editor, path);
 }

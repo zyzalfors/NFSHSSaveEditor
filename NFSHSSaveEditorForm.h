@@ -26,7 +26,7 @@
 #define ALL_TRACKS 1014
 #define GOLD_TROPHIES 1015
 
-char path[MAX_PATH];
+char path[MAX_PATH] = {0};
 NFSHSSaveEditor editor = {0};
 
 void InitGui(HWND hWnd) {
@@ -268,8 +268,23 @@ void OpenSave(HWND hWnd, NFSHSSaveEditor* editor) {
 }
 
 void WriteSave(HWND hWnd, NFSHSSaveEditor* editor) {
-    NFSHSSaveEditor_update(editor);
-    MessageBoxA(hWnd, "Save(s) written.", "Info", MB_OK | MB_ICONINFORMATION);
+    const char* p = strrchr(path, '\\');
+
+    char newpath[MAX_PATH];
+    strcpy(newpath, p && p[1] ? p + 1 : path);
+
+    OPENFILENAME ofn = {0};
+    ofn.lStructSize = sizeof(OPENFILENAME);
+    ofn.hwndOwner = hWnd;
+    ofn.lpstrFile = newpath;
+    ofn.nMaxFile = sizeof(newpath);
+    ofn.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST;
+    if(!GetSaveFileNameA(&ofn)) return;
+
+    if(NFSHSSaveEditor_update(editor, (const char*) newpath))
+        MessageBoxA(hWnd, "Save(s) written.", "Info", MB_OK | MB_ICONINFORMATION);
+    else
+        MessageBoxA(hWnd, "Unable to write save(s) correctly.", "Error", MB_OK | MB_ICONERROR);
 }
 
 void UpdateSave(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
