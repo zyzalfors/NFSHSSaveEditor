@@ -81,8 +81,8 @@ typedef struct {
 } NFSHSSave;
 
 typedef struct {
-    const char* format;
     const char* path;
+    const char* format;
     uint8_t* data;
     size_t size;
     NFSHSSave* saves;
