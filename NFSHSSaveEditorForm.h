@@ -125,14 +125,14 @@ void InitGui(HWND hWnd) {
     h = CreateWindowA("BUTTON", "All cars", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10, y, 100, 20, hWnd, (HMENU) ALL_CARS_BTN, NULL, NULL);
     EnableWindow(h, FALSE);
 
-    h = CreateWindowA("BUTTON", "All tracks", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 120, y, 100, 20, hWnd, (HMENU) ALL_TRACKS_BTN, NULL, NULL);
+    h = CreateWindowA("BUTTON", "All tracks", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 130, y, 100, 20, hWnd, (HMENU) ALL_TRACKS_BTN, NULL, NULL);
     EnableWindow(h, FALSE);
 
-    h = CreateWindowA("BUTTON", "Gold trophies", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 230, y, 100, 20, hWnd, (HMENU) GOLD_TROPHIES_BTN, NULL, NULL);
+    h = CreateWindowA("BUTTON", "Gold trophies", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 250, y, 100, 20, hWnd, (HMENU) GOLD_TROPHIES_BTN, NULL, NULL);
     EnableWindow(h, FALSE);
 }
 
-void ClearGui(HWND hWnd) {
+void ResetGui(HWND hWnd) {
     SendMessage(GetDlgItem(hWnd, TOOLBAR), TB_ENABLEBUTTON, (WPARAM) WRITE_BTN, MAKELONG(FALSE, 0));
 
     HWND h = GetDlgItem(hWnd, PATH_TXT);
@@ -189,8 +189,8 @@ void ClearGui(HWND hWnd) {
     EnableWindow(h, FALSE);
 }
 
-void PrintSaveById(HWND hWnd, NFSHSSaveEditor* editor, const BOOL chsave, const BOOL chownedcar, const size_t saveidx, const size_t carslotidx) {
-    if(chsave) {
+void UpdateGui(HWND hWnd, NFSHSSaveEditor* editor, const BOOL upsavedata, const BOOL upcardata, const size_t saveidx, const size_t carslotidx) {
+    if(upsavedata) {
         HWND h = GetDlgItem(hWnd, SERIAL_TXT);
         SetWindowTextA(h, "");
         if(editor->saves[saveidx].serial) {
@@ -218,7 +218,7 @@ void PrintSaveById(HWND hWnd, NFSHSSaveEditor* editor, const BOOL chsave, const 
         SetDlgItemInt(hWnd, MONEY_TXT, editor->saves[saveidx].money, TRUE);
     }
 
-    if(chownedcar) {
+    if(upcardata) {
         HWND h = GetDlgItem(hWnd, OWNED_CAR_MODEL_COMBO);
         EnableWindow(h, TRUE);
         SendMessage(h, CB_SETCURSEL, 0, 0);
@@ -243,7 +243,7 @@ void PrintSave(HWND hWnd, NFSHSSaveEditor* editor, const char* path) {
     if(editor->savecount == 0) {
         NFSHSSaveEditor_clear(editor);
         MessageBoxA(hWnd, "No NFSHS save found.", "Error", MB_OK | MB_ICONERROR);
-        ClearGui(hWnd);
+        ResetGui(hWnd);
         return;
     }
 
@@ -286,7 +286,7 @@ void PrintSave(HWND hWnd, NFSHSSaveEditor* editor, const char* path) {
     h = GetDlgItem(hWnd, GOLD_TROPHIES_BTN);
     EnableWindow(h, TRUE);
 
-    PrintSaveById(hWnd, editor, TRUE, TRUE, 0, 0);
+    UpdateGui(hWnd, editor, TRUE, TRUE, 0, 0);
 }
 
 void OpenSave(HWND hWnd, NFSHSSaveEditor* editor) {
@@ -398,7 +398,7 @@ void ProcessCmd(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             if(HIWORD(wParam) == CBN_SELCHANGE) {
                 LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
                 LRESULT carslotidx = SendDlgItemMessageA(hWnd, OWNED_CAR_SLOT_COMBO, CB_GETCURSEL, 0, 0);
-                PrintSaveById(hWnd, editor, TRUE, TRUE, saveidx, carslotidx);
+                UpdateGui(hWnd, editor, TRUE, TRUE, saveidx, carslotidx);
             }
             break;
 
@@ -417,7 +417,7 @@ void ProcessCmd(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             if(HIWORD(wParam) == CBN_SELCHANGE) {
                 LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
                 LRESULT carslotidx = SendDlgItemMessageA(hWnd, OWNED_CAR_SLOT_COMBO, CB_GETCURSEL, 0, 0);
-                PrintSaveById(hWnd, editor, FALSE, TRUE, saveidx, carslotidx);
+                UpdateGui(hWnd, editor, FALSE, TRUE, saveidx, carslotidx);
             }
             break;
 
