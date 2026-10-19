@@ -89,7 +89,7 @@ typedef struct {
     size_t savecount;
 } NFSHSSaveEditor;
 
-const char* NFSHSSaveEditor_serials[] = {"SLUS-00826", "SLES-01876", "SLES-01788", "SLES-01789", "SLES-01790"};
+const char* NFSHSSaveEditor_serials[] = {"SLUS-00826", "SLES-01876", "SLES-01788", "SLES-01789", "SLES-01790", "SLPS-02099"};
 const char* NFSHSSaveEditor_languages[] = {"EN/JA", "DE", "FR", "ES", "IT", "SV"};
 const char* NFSHSSaveEditor_models[] = {"Mercedes-Benz SLK", "BMW Z3", "Holden VT/Nissan Skyline", "Ford Falcon", "Chevrolet Camaro", "Pontiac Firebird", "Aston Martin DB7", "Jaguar XKR", "BMW M5", "Chevrolet Corvette", "Ferrari 550", "Porsche 911", "Ferrari F50", "Lamborghini Diablo", "Mercedes-Benz CLK GTR", "McLaren F1 GTR", "Porsche 911 Race", "Holden VT/Nissan Skyline Race", "Chevrolet Corvette Race", "NFS Phantom", "NFS Titan", "NFS Titan?", "Chevrolet Caprice Police", "Holden VT Police", "BMW M5 Police", "Chevrolet Corvette Police", "Porsche 911 Police", "Lamborghini Diablo Police", "NFS Jailbird", "Audi A4", "BMW 530i", "Mercedes-Benz 500SL", "Volvo 850", "GMC B-Series", "Toyota Land Cruiser", "Mazda Miata", "Mercedes-Benz Unimog Army Truck", "Jeep Comanche", "Chevrolet G30", "Chevrolet G30 Dirty", "NFS Van", "Jeep Cherokee", "Chevrolet C20", "Chevrolet C20", "NFS Pickup Truck", "Plymouth Barracuda", "Chevrolet Caprice Taxi", "Prevost H3", "Mercedes-Benz Unimog Log Truck", "MCI Classic"};
 const uint8_t NFSHSSaveEditor_upgrades[] = {0x00, 0x01, 0x03, 0x07};
