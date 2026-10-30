@@ -1,5 +1,5 @@
 # Need for Speed High Stakes/Road Challenge Save Editor
-This GUI tool allows users to read and edit save files for the PlayStation game Need for Speed High Stakes/Road Challenge-Over Drivin' IV. It supports all save regions. The tool supports the formats RAW (raw save bytes), SC (PS1 save slot), MC (PS1 memory card image), GME (DexDrive), and PSV (PS1 save image for PS3), but it does not support resigning PSV files.
+This GUI tool allows users to read and edit save files for the PlayStation game Need for Speed High Stakes/Road Challenge-Over Drivin' IV. It supports all save versions and regions, with partial compatibility for [NFSHSCE](https://nfsmods.xyz/mod/2811). The tool supports the formats RAW (raw save bytes), SC (PS1 save slot), MC (PS1 memory card image), GME (DexDrive), and PSV (PS1 save image for PS3), but it does not support resigning PSV files.
 
 The tool can edit various properties such as language, money, and owned vehicles, as well as unlock cars, tracks, and gold trophies.
 
