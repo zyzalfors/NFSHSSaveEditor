@@ -89,10 +89,10 @@ typedef struct {
     size_t savecount;
 } NFSHSSaveEditor;
 
-const char* NFSHSSaveEditor_serials[] = { "SLUS-00826", "SLES-01876", "SLES-01788", "SLES-01789", "SLES-01790", "SLPS-02099" };
-const char* NFSHSSaveEditor_languages[] = { "EN/JA", "DE", "FR", "ES", "IT", "SV" };
-const char* NFSHSSaveEditor_models[] = { "Mercedes-Benz SLK", "BMW Z3", "Holden VT/Nissan Skyline", "Ford Falcon", "Chevrolet Camaro", "Pontiac Firebird", "Aston Martin DB7", "Jaguar XKR", "BMW M5", "Chevrolet Corvette", "Ferrari 550", "Porsche 911", "Ferrari F50", "Lamborghini Diablo", "Mercedes-Benz CLK GTR", "McLaren F1 GTR", "Porsche 911 Race", "Holden VT/Nissan Skyline Race", "Chevrolet Corvette Race", "NFS Phantom", "NFS Titan", "NFS Titan?", "Chevrolet Caprice Police", "Holden VT Police", "BMW M5 Police", "Chevrolet Corvette Police", "Porsche 911 Police", "Lamborghini Diablo Police", "NFS Jailbird", "Audi A4", "BMW 530i", "Mercedes-Benz 500SL", "Volvo 850", "GMC B-Series", "Toyota Land Cruiser", "Mazda Miata", "Mercedes-Benz Unimog Army Truck", "Jeep Comanche", "Chevrolet G30", "Chevrolet G30 Dirty", "NFS Van", "Jeep Cherokee", "Chevrolet C20", "Chevrolet C20", "NFS Pickup Truck", "Plymouth Barracuda", "Chevrolet Caprice Taxi", "Prevost H3", "Mercedes-Benz Unimog Log Truck", "MCI Classic" };
-const uint8_t NFSHSSaveEditor_upgrades[] = { 0x00, 0x01, 0x03, 0x07 };
+const char* NFSHSSaveEditor_serials[] = {"SLUS-00826", "SLES-01876", "SLES-01788", "SLES-01789", "SLES-01790", "SLPS-02099"};
+const char* NFSHSSaveEditor_languages[] = {"EN/JA", "DE", "FR", "ES", "IT", "SV"};
+const char* NFSHSSaveEditor_models[] = {"Mercedes-Benz SLK", "BMW Z3", "Holden VT/Nissan Skyline", "Ford Falcon", "Chevrolet Camaro", "Pontiac Firebird", "Aston Martin DB7", "Jaguar XKR", "BMW M5", "Chevrolet Corvette", "Ferrari 550", "Porsche 911", "Ferrari F50", "Lamborghini Diablo", "Mercedes-Benz CLK GTR", "McLaren F1 GTR", "Porsche 911 Race", "Holden VT/Nissan Skyline Race", "Chevrolet Corvette Race", "NFS Phantom", "NFS Titan", "NFS Titan?", "Chevrolet Caprice Police", "Holden VT Police", "BMW M5 Police", "Chevrolet Corvette Police", "Porsche 911 Police", "Lamborghini Diablo Police", "NFS Jailbird", "Audi A4", "BMW 530i", "Mercedes-Benz 500SL", "Volvo 850", "GMC B-Series", "Toyota Land Cruiser", "Mazda Miata", "Mercedes-Benz Unimog Army Truck", "Jeep Comanche", "Chevrolet G30", "Chevrolet G30 Dirty", "NFS Van", "Jeep Cherokee", "Chevrolet C20", "Chevrolet C20", "NFS Pickup Truck", "Plymouth Barracuda", "Chevrolet Caprice Taxi", "Prevost H3", "Mercedes-Benz Unimog Log Truck", "MCI Classic"};
+const uint8_t NFSHSSaveEditor_upgrades[] = {0x00, 0x01, 0x03, 0x07};
 
 const uint8_t NFSHSSaveEditor_table1[256] = {
     0x00, 0xc1, 0x81, 0x40, 0x01, 0xc0, 0x80, 0x41, 0x01, 0xc0, 0x80, 0x41, 0x00, 0xc1, 0x81, 0x40,
@@ -133,39 +133,39 @@ const uint8_t NFSHSSaveEditor_table2[256] = {
 };
 
 int NFSHSSaveEditor_findstr(const char* s, const char* list[], const size_t n) {
-    for (size_t i = 0; i < n && s; i++)
-        if (strcmp(s, list[i]) == 0) return (int)i;
+    for(size_t i = 0; i < n && s; i++)
+        if(strcmp(s, list[i]) == 0) return (int) i;
 
     return -1;
 }
 
 int NFSHSSaveEditor_findbyte(const uint8_t v, const uint8_t list[], const size_t n) {
-    for (size_t i = 0; i < n; i++)
-        if (list[i] == v) return (int)i;
+    for(size_t i = 0; i < n; i++)
+        if(list[i] == v) return (int) i;
 
     return -1;
 }
 
 int32_t NFSHSSaveEditor_toint(const uint8_t buf[]) {
-    uint32_t uv = ((uint32_t)buf[0]) | ((uint32_t)buf[1] << 8) | ((uint32_t)buf[2] << 16) | ((uint32_t)buf[3] << 24);
+    uint32_t uv = ((uint32_t) buf[0]) | ((uint32_t) buf[1] << 8) | ((uint32_t) buf[2] << 16) | ((uint32_t) buf[3] << 24);
     int32_t v = 0;
     memcpy(&v, &uv, sizeof(int32_t));
     return v;
 }
 
 void NFSHSSaveEditor_fromint(const int32_t v, uint8_t buf[]) {
-    uint32_t uv = (uint32_t)v;
-    buf[0] = (uint8_t)uv;
-    buf[1] = (uint8_t)(uv >> 8);
-    buf[2] = (uint8_t)(uv >> 16);
-    buf[3] = (uint8_t)(uv >> 24);
+    uint32_t uv = (uint32_t) v;
+    buf[0] = (uint8_t) uv;
+    buf[1] = (uint8_t) (uv >> 8);
+    buf[2] = (uint8_t) (uv >> 16);
+    buf[3] = (uint8_t) (uv >> 24);
 }
 
 void NFSHSSaveEditor_getcrc16(const uint8_t buf[], int size, uint8_t crc[]) {
     uint8_t hi = 0xfb;
     uint8_t lo = 0xea;
 
-    while (size >= 4) {
+    while(size >= 4) {
         const uint8_t idx = buf[0] ^ lo;
 
         hi = buf[1] ^ NFSHSSaveEditor_table1[idx] ^ hi;
@@ -180,7 +180,7 @@ void NFSHSSaveEditor_getcrc16(const uint8_t buf[], int size, uint8_t crc[]) {
         size -= 4;
     }
 
-    while (size > 0) {
+    while(size > 0) {
         const uint8_t idx = buf[0] ^ lo;
 
         lo = NFSHSSaveEditor_table1[idx] ^ hi;
@@ -197,14 +197,14 @@ void NFSHSSaveEditor_getcrc16(const uint8_t buf[], int size, uint8_t crc[]) {
 }
 
 void NFSHSSaveEditor_clear(NFSHSSaveEditor* editor) {
-    if (!editor) return;
-    if (editor->data) free(editor->data);
-    if (editor->saves) free(editor->saves);
+    if(!editor) return;
+    if(editor->data) free(editor->data);
+    if(editor->saves) free(editor->saves);
     memset(editor, 0, sizeof(NFSHSSaveEditor));
 }
 
 void NFSHSSaveEditor_parseinfo(NFSHSSaveEditor* editor) {
-    for (size_t i = 0; i < editor->savecount; i++) {
+    for(size_t i = 0; i < editor->savecount; i++) {
         const uint8_t lanidx = editor->data[editor->saves[i].start + LANGUAGE_START];
         editor->saves[i].language = lanidx < ARRAY_SIZE(NFSHSSaveEditor_languages) ? NFSHSSaveEditor_languages[lanidx] : NFSHSSaveEditor_languages[0];
 
@@ -214,18 +214,18 @@ void NFSHSSaveEditor_parseinfo(NFSHSSaveEditor* editor) {
         editor->saves[i].money = NFSHSSaveEditor_toint(editor->data + editor->saves[i].start + TOURNAMENT_INFO_START);
 
         const size_t pos = editor->saves[i].start + CAR_INFO_START;
-        for (size_t j = 0; j < OWNED_CAR_SLOT_COUNT; j++) {
+        for(size_t j = 0; j < OWNED_CAR_SLOT_COUNT; j++) {
             const uint8_t modidx = editor->data[pos + OWNED_CAR_SLOT_SIZE * j];
-            NFSHSOwnedCar car = { NULL, 0, 0 };
+            NFSHSOwnedCar car = {NULL, 0, 0};
 
-            if (modidx < ARRAY_SIZE(NFSHSSaveEditor_models)) {
+            if(modidx < ARRAY_SIZE(NFSHSSaveEditor_models)) {
                 car.model = NFSHSSaveEditor_models[modidx];
 
                 const int upgidx = NFSHSSaveEditor_findbyte(editor->data[pos + OWNED_CAR_SLOT_SIZE * j + 1], NFSHSSaveEditor_upgrades, ARRAY_SIZE(NFSHSSaveEditor_upgrades));
-                if (upgidx > -1) car.upgrade = (uint8_t)upgidx;
+                if(upgidx > -1) car.upgrade = (uint8_t) upgidx;
 
                 const uint8_t colidx = editor->data[pos + OWNED_CAR_SLOT_SIZE * j + 2];
-                if (colidx < OWNED_CAR_COLOR_COUNT) car.color = colidx;
+                if(colidx < OWNED_CAR_COLOR_COUNT) car.color = colidx;
             }
 
             editor->saves[i].ownedcars[j] = car;
@@ -238,11 +238,11 @@ void NFSHSSaveEditor_parseinfo(NFSHSSaveEditor* editor) {
 }
 
 void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
-    if (editor->size >= RAW_SAVE_SIZE) {
-        if (memcmp(editor->data, RAW_MAGIC, sizeof(RAW_MAGIC) - 1) == 0) {
-            editor->saves = (NFSHSSave*)malloc(sizeof(NFSHSSave));
+    if(editor->size >= RAW_SAVE_SIZE) {
+        if(memcmp(editor->data, RAW_MAGIC, sizeof(RAW_MAGIC) - 1) == 0) {
+            editor->saves = (NFSHSSave*) malloc(sizeof(NFSHSSave));
 
-            if (editor->saves) {
+            if(editor->saves) {
                 editor->format = "RAW";
                 NFSHSSave save;
                 save.start = 0;
@@ -256,11 +256,11 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
         }
     }
 
-    if (editor->size >= SC_HEADER_SIZE + RAW_SAVE_SIZE) {
-        if (memcmp(editor->data, SC_MAGIC, sizeof(SC_MAGIC) - 1) == 0) {
-            editor->saves = (NFSHSSave*)malloc(sizeof(NFSHSSave));
+    if(editor->size >= SC_HEADER_SIZE + RAW_SAVE_SIZE) {
+        if(memcmp(editor->data, SC_MAGIC, sizeof(SC_MAGIC) - 1) == 0) {
+            editor->saves = (NFSHSSave*) malloc(sizeof(NFSHSSave));
 
-            if (editor->saves) {
+            if(editor->saves) {
                 editor->format = "SC";
                 NFSHSSave save;
                 save.start = SC_HEADER_SIZE;
@@ -274,18 +274,18 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
         }
     }
 
-    if (editor->size >= PSV_HEADER_SIZE + SC_HEADER_SIZE + RAW_SAVE_SIZE) {
-        if (memcmp(editor->data, PSV_MAGIC, sizeof(PSV_MAGIC) - 1) == 0) {
+    if(editor->size >= PSV_HEADER_SIZE + SC_HEADER_SIZE + RAW_SAVE_SIZE) {
+        if(memcmp(editor->data, PSV_MAGIC, sizeof(PSV_MAGIC) - 1) == 0) {
             char serial[SERIAL_SIZE + 1];
             serial[SERIAL_SIZE] = '\0';
 
             memcpy(serial, editor->data + 102, sizeof(serial) - 1);
             const int seridx = NFSHSSaveEditor_findstr(serial, NFSHSSaveEditor_serials, ARRAY_SIZE(NFSHSSaveEditor_serials));
 
-            if (seridx > -1) {
-                editor->saves = (NFSHSSave*)malloc(sizeof(NFSHSSave));
+            if(seridx > -1) {
+                editor->saves = (NFSHSSave*) malloc(sizeof(NFSHSSave));
 
-                if (editor->saves) {
+                if(editor->saves) {
                     editor->format = "PSV";
                     NFSHSSave save;
                     save.start = PSV_HEADER_SIZE + SC_HEADER_SIZE;
@@ -303,16 +303,16 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
     size_t gmeshift = 0;
     const char* format = NULL;
 
-    if (editor->size >= MC_SIZE && memcmp(editor->data, MC_MAGIC, sizeof(MC_MAGIC) - 1) == 0) {
-        gmeshift = 0;
-        format = "MC";
+    if(editor->size >= MC_SIZE && memcmp(editor->data, MC_MAGIC, sizeof(MC_MAGIC) - 1) == 0) {
+       gmeshift = 0;
+       format = "MC";
     }
-    else if (editor->size >= GME_HEADER_SIZE + MC_SIZE && memcmp(editor->data, GME_MAGIC, sizeof(GME_MAGIC) - 1) == 0) {
-        gmeshift = GME_HEADER_SIZE;
-        format = "GME";
+    else if(editor->size >= GME_HEADER_SIZE + MC_SIZE && memcmp(editor->data, GME_MAGIC, sizeof(GME_MAGIC) - 1) == 0) {
+       gmeshift = GME_HEADER_SIZE;
+       format = "GME";
     }
 
-    if (format) {
+    if(format) {
         long starts[MC_BLOCK_COUNT];
         int serials[MC_BLOCK_COUNT];
 
@@ -320,32 +320,32 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
         char serial[SERIAL_SIZE + 1];
         serial[SERIAL_SIZE] = '\0';
 
-        for (size_t i = 1; i < MC_BLOCK_COUNT; i++) {
+        for(size_t i = 1; i < MC_BLOCK_COUNT; i++) {
             starts[i] = -1;
             serials[i] = -1;
 
             memcpy(serial, editor->data + gmeshift + MC_HEADER_SIZE * i + 12, sizeof(serial) - 1);
             const int seridx = NFSHSSaveEditor_findstr(serial, NFSHSSaveEditor_serials, ARRAY_SIZE(NFSHSSaveEditor_serials));
 
-            if (editor->data[gmeshift + MC_HEADER_SIZE * i] == 0x51 && seridx > -1) {
+            if(editor->data[gmeshift + MC_HEADER_SIZE * i] == 0x51 && seridx > -1) {
                 starts[i] = gmeshift + MC_BLOCK_SIZE * i + SC_HEADER_SIZE;
                 serials[i] = seridx;
                 n++;
             }
         }
 
-        if (n > 0) {
-            editor->saves = (NFSHSSave*)malloc(n * sizeof(NFSHSSave));
+        if(n > 0) {
+            editor->saves = (NFSHSSave*) malloc(n * sizeof(NFSHSSave));
 
-            if (editor->saves) {
+            if(editor->saves) {
                 editor->format = format;
 
                 size_t j = 0;
                 NFSHSSave save;
 
-                for (size_t i = 1; i < MC_BLOCK_COUNT; i++) {
-                    if (starts[i] > -1 && serials[i] > -1) {
-                        save.start = (size_t)starts[i];
+                for(size_t i = 1; i < MC_BLOCK_COUNT; i++) {
+                    if(starts[i] > -1 && serials[i] > -1) {
+                        save.start = (size_t) starts[i];
                         save.serial = NFSHSSaveEditor_serials[serials[i]];
                         editor->saves[j++] = save;
                     }
@@ -359,35 +359,35 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
 }
 
 void NFSHSSaveEditor_init(NFSHSSaveEditor* editor, const char* path) {
-    if (!editor || !path) return;
+    if(!editor || !path) return;
 
     FILE* fp = fopen(path, "rb");
-    if (!fp) return;
+    if(!fp) return;
 
-    if (fseek(fp, 0, SEEK_END) != 0) {
+    if(fseek(fp, 0, SEEK_END) != 0) {
         fclose(fp);
         return;
     }
 
     const long fs = ftell(fp);
-    if (fs <= 0) {
+    if(fs <= 0) {
         fclose(fp);
         return;
     }
 
-    uint8_t* data = (uint8_t*)malloc(((size_t)fs) * sizeof(uint8_t));
-    if (!data) {
+    uint8_t* data = (uint8_t*) malloc(((size_t) fs) * sizeof(uint8_t));
+    if(!data) {
         fclose(fp);
         return;
     }
 
-    if (fseek(fp, 0, SEEK_SET) != 0) {
+    if(fseek(fp, 0, SEEK_SET) != 0) {
         fclose(fp);
         free(data);
         return;
     }
 
-    if (fread(data, sizeof(uint8_t), (size_t)fs, fp) != (size_t)fs) {
+    if(fread(data, sizeof(uint8_t), (size_t) fs, fp) != (size_t) fs) {
         fclose(fp);
         free(data);
         return;
@@ -398,14 +398,14 @@ void NFSHSSaveEditor_init(NFSHSSaveEditor* editor, const char* path) {
     NFSHSSaveEditor_clear(editor);
     editor->path = path;
     editor->data = data;
-    editor->size = (size_t)fs;
+    editor->size = (size_t) fs;
     NFSHSSaveEditor_parse(editor);
 }
 
 void NFSHSSaveEditor_fixcrc16(NFSHSSaveEditor* editor) {
     uint8_t crc[sizeof(uint32_t)];
 
-    for (size_t i = 0; i < editor->savecount; i++) {
+    for(size_t i = 0; i < editor->savecount; i++) {
         NFSHSSaveEditor_getcrc16(editor->data + editor->saves[i].start + FRONTEND_START, FRONTEND_SIZE, crc);
         memcpy(editor->data + editor->saves[i].start + FRONTEND_CRC_START, crc, sizeof(crc));
 
@@ -426,7 +426,7 @@ void NFSHSSaveEditor_fixcrc16(NFSHSSaveEditor* editor) {
 int NFSHSSaveEditor_write(NFSHSSaveEditor* editor, const char* path) {
     FILE* fp = fopen(path, "wb");
 
-    if (fp) {
+    if(fp) {
         size_t n = fwrite(editor->data, sizeof(uint8_t), editor->size, fp);
         fclose(fp);
         return n == editor->size;
@@ -436,18 +436,18 @@ int NFSHSSaveEditor_write(NFSHSSaveEditor* editor, const char* path) {
 }
 
 void NFSHSSaveEditor_updatelang(NFSHSSaveEditor* editor, const size_t saveidx, const char* lan) {
-    if (saveidx >= editor->savecount) return;
+    if(saveidx >= editor->savecount) return;
     const int lanidx = NFSHSSaveEditor_findstr(lan, NFSHSSaveEditor_languages, ARRAY_SIZE(NFSHSSaveEditor_languages));
     editor->saves[saveidx].language = lanidx > -1 ? NFSHSSaveEditor_languages[lanidx] : NFSHSSaveEditor_languages[0];
 }
 
 void NFSHSSaveEditor_updatemoney(NFSHSSaveEditor* editor, const size_t saveidx, const int32_t money) {
-    if (saveidx >= editor->savecount) return;
+    if(saveidx >= editor->savecount) return;
     editor->saves[saveidx].money = money;
 }
 
 void NFSHSSaveEditor_updateownedcar(NFSHSSaveEditor* editor, const size_t saveidx, const size_t carslotidx, const char* model, const uint8_t upgrade, const uint8_t color) {
-    if (saveidx >= editor->savecount || carslotidx >= OWNED_CAR_SLOT_COUNT) return;
+    if(saveidx >= editor->savecount || carslotidx >= OWNED_CAR_SLOT_COUNT) return;
 
     const int modidx = NFSHSSaveEditor_findstr(model, NFSHSSaveEditor_models, ARRAY_SIZE(NFSHSSaveEditor_models));
     const uint8_t upgidx = upgrade < ARRAY_SIZE(NFSHSSaveEditor_upgrades) ? upgrade : 0;
@@ -459,50 +459,50 @@ void NFSHSSaveEditor_updateownedcar(NFSHSSaveEditor* editor, const size_t saveid
 }
 
 void NFSHSSaveEditor_unlockcars(NFSHSSaveEditor* editor, const size_t saveidx) {
-    if (saveidx >= editor->savecount) return;
+    if(saveidx >= editor->savecount) return;
     editor->saves[saveidx].unlockallcars = 1;
 }
 
 void NFSHSSaveEditor_unlocktracks(NFSHSSaveEditor* editor, const size_t saveidx) {
-    if (saveidx >= editor->savecount) return;
+    if(saveidx >= editor->savecount) return;
     editor->saves[saveidx].unlockalltracks = 1;
 }
 
 void NFSHSSaveEditor_setgoldtrophies(NFSHSSaveEditor* editor, const size_t saveidx) {
-    if (saveidx >= editor->savecount) return;
+    if(saveidx >= editor->savecount) return;
     editor->saves[saveidx].setgoldtrophies = 1;
 }
 
 int NFSHSSaveEditor_update(NFSHSSaveEditor* editor, const char* path) {
-    if (!editor || !editor->data || !editor->path || editor->savecount == 0) return 0;
+    if(!editor || !editor->data || !editor->path || editor->savecount == 0) return 0;
     uint8_t buf[sizeof(uint32_t)];
 
-    for (size_t i = 0; i < editor->savecount; i++) {
+    for(size_t i = 0; i < editor->savecount; i++) {
         const int lanidx = NFSHSSaveEditor_findstr(editor->saves[i].language, NFSHSSaveEditor_languages, ARRAY_SIZE(NFSHSSaveEditor_languages));
-        editor->data[editor->saves[i].start + LANGUAGE_START] = lanidx > -1 ? (uint8_t)lanidx : 0;
+        editor->data[editor->saves[i].start + LANGUAGE_START] = lanidx > -1 ? (uint8_t) lanidx : 0;
 
         NFSHSSaveEditor_fromint(editor->saves[i].money, buf);
         memcpy(editor->data + editor->saves[i].start + TOURNAMENT_INFO_START, buf, sizeof(buf));
 
-        for (size_t j = 0; j < OWNED_CAR_SLOT_COUNT; j++) {
+        for(size_t j = 0; j < OWNED_CAR_SLOT_COUNT; j++) {
             const int modidx = NFSHSSaveEditor_findstr(editor->saves[i].ownedcars[j].model, NFSHSSaveEditor_models, ARRAY_SIZE(NFSHSSaveEditor_models));
             const uint8_t upgidx = editor->saves[i].ownedcars[j].upgrade < ARRAY_SIZE(NFSHSSaveEditor_upgrades) ? editor->saves[i].ownedcars[j].upgrade : 0;
             const uint8_t colidx = editor->saves[i].ownedcars[j].color < OWNED_CAR_COLOR_COUNT ? editor->saves[i].ownedcars[j].color : 0;
 
-            editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j] = modidx > -1 ? (uint8_t)modidx : EMPTY_CAR_SLOT_FLAG;
+            editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j] = modidx > -1 ? (uint8_t) modidx : EMPTY_CAR_SLOT_FLAG;
             editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j + 1] = modidx > -1 ? NFSHSSaveEditor_upgrades[upgidx] : NFSHSSaveEditor_upgrades[0];
             editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j + 2] = modidx > -1 ? colidx : 0;
         }
 
-        if (editor->saves[i].unlockallcars) {
+        if(editor->saves[i].unlockallcars) {
             memset(editor->data + editor->saves[i].start + CAR_AVAILABILITY_START, 0x01, CAR_AVAILABILITY_SIZE);
             memset(editor->data + editor->saves[i].start + CAR_VISIBILITY_START, 0x01, CAR_VISIBILITY_SIZE);
         }
 
-        if (editor->saves[i].unlockalltracks)
+        if(editor->saves[i].unlockalltracks)
             memset(editor->data + editor->saves[i].start + TRACK_INFO_START, 0x01, TRACK_INFO_SIZE);
 
-        if (editor->saves[i].setgoldtrophies)
+        if(editor->saves[i].setgoldtrophies)
             memset(editor->data + editor->saves[i].start + TROPHIES_START, 0x01, TROPHIES_SIZE);
     }
 
