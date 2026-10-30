@@ -1,14 +1,19 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "NFSHSSaveEditor.h"
 #include <windows.h>
 #include <commctrl.h>
 #include <commdlg.h>
 
+#ifdef _MSC_VER
+#pragma comment(lib, "Comctl32.lib")
+#endif
+
 #define WND_CLASS_NAME "NFSHSSaveEditor"
 #define WND_TITLE "NFSHS Save Editor"
 #define WND_WIDTH 380
-#define WND_HEIGHT 420
+#define WND_HEIGHT 430
 #define WND_Y_POS 30
-#define TEXT_WIDTH 250
 #define MAX_BUF_SIZE 50
 
 #define TOOLBAR 1000
@@ -35,107 +40,110 @@ NFSHSSaveEditor editor = {0};
 void InitGui(HWND hWnd) {
     SetWindowLongPtr(hWnd, GWL_STYLE, GetWindowLongPtr(hWnd, GWL_STYLE) & ~((LONG_PTR) WS_MAXIMIZEBOX));
 
-    HWND h = CreateWindowA(TOOLBARCLASSNAME, NULL, WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | TBSTYLE_LIST, 0, 0, 0, 0, hWnd, (HMENU) TOOLBAR, NULL, NULL);
-    SendMessage(h, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
-    TBBUTTON buttons[] = {{I_IMAGENONE, OPEN_BTN, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE, {0}, 0, (INT_PTR) "Open"},
-                          {I_IMAGENONE, WRITE_BTN, 0, BTNS_BUTTON | BTNS_AUTOSIZE, {0}, 0, (INT_PTR) "Write"}};
-    SendMessage(h, TB_ADDBUTTONS, ARRAYSIZE(buttons), (LPARAM) buttons);
-    SendMessage(h, TB_AUTOSIZE, 0, 0);
-    SendMessage(h, CCM_SETBKCOLOR, 0, RGB(255, 255, 255));
+    HWND h = CreateWindowExA(0, TOOLBARCLASSNAMEA, NULL, WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | TBSTYLE_LIST, 0, 0, 0, 0, hWnd, (HMENU) (INT_PTR) TOOLBAR, NULL, NULL);
+    SendMessageA(h, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
+    LRESULT idx = SendMessageA(h, TB_ADDSTRINGA, 0, (LPARAM) "Open\0Write\0");
+    TBBUTTON buttons[] = {{I_IMAGENONE, OPEN_BTN, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE, {0}, 0, (INT_PTR) idx},
+                          {I_IMAGENONE, WRITE_BTN, 0, BTNS_BUTTON | BTNS_AUTOSIZE, {0}, 0, (INT_PTR) (idx + 1)}};
+    SendMessageA(h, TB_ADDBUTTONS, ARRAYSIZE(buttons), (LPARAM) buttons);
+    SendMessageA(h, TB_AUTOSIZE, 0, 0);
+    SendMessageA(h, CCM_SETBKCOLOR, 0, RGB(255, 255, 255));
 
-    size_t y = WND_Y_POS;
+    int y = WND_Y_POS;
 
-    CreateWindowA("STATIC", "Path:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, NULL, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, TEXT_WIDTH, 20, hWnd, (HMENU) PATH_TXT, NULL, NULL);
-    SendMessage(h, EM_SETREADONLY, TRUE, 0);
+    CreateWindowExA(0, WC_STATICA, "Path:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_EDITA, NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, 250, 20, hWnd, (HMENU) (INT_PTR) PATH_TXT, NULL, NULL);
+    SendMessageA(h, EM_SETREADONLY, TRUE, 0);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    CreateWindowA("STATIC", "Format:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, NULL, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, TEXT_WIDTH, 20, hWnd, (HMENU) FORMAT_TXT, NULL, NULL);
-    SendMessage(h, EM_SETREADONLY, TRUE, 0);
+    CreateWindowExA(0, WC_STATICA, "Format:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_EDITA, NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, 250, 20, hWnd, (HMENU) (INT_PTR) FORMAT_TXT, NULL, NULL);
+    SendMessageA(h, EM_SETREADONLY, TRUE, 0);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    CreateWindowA("STATIC", "Save:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) SAVE_COMBO, NULL, NULL);
+    CreateWindowExA(0, WC_STATICA, "Save:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_COMBOBOXA, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 250, 200, hWnd, (HMENU) (INT_PTR) SAVE_COMBO, NULL, NULL);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    CreateWindowA("STATIC", "Serial:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, TEXT_WIDTH, 20, hWnd, (HMENU) SERIAL_TXT, NULL, NULL);
-    SendMessage(h, EM_SETREADONLY, TRUE, 0);
+    CreateWindowExA(0, WC_STATICA, "Serial:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_EDITA, NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, 250, 20, hWnd, (HMENU) (INT_PTR) SERIAL_TXT, NULL, NULL);
+    SendMessageA(h, EM_SETREADONLY, TRUE, 0);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    CreateWindowA("STATIC", "Name:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, TEXT_WIDTH, 20, hWnd, (HMENU) PLAYER_NAME_TXT, NULL, NULL);
-    SendMessage(h, EM_SETREADONLY, TRUE, 0);
+    CreateWindowExA(0, WC_STATICA, "Name:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_EDITA, NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, 250, 20, hWnd, (HMENU) (INT_PTR) PLAYER_NAME_TXT, NULL, NULL);
+    SendMessageA(h, EM_SETREADONLY, TRUE, 0);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    CreateWindowA("STATIC", "Language:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) LANGUAGE_COMBO, NULL, NULL);
+    CreateWindowExA(0, WC_STATICA, "Language:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_COMBOBOXA, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 250, 200, hWnd, (HMENU) (INT_PTR) LANGUAGE_COMBO, NULL, NULL);
     for(size_t i = 0; i < ARRAY_SIZE(NFSHSSaveEditor_languages); i++)
-        SendMessage(h, CB_ADDSTRING, 0, (LPARAM) NFSHSSaveEditor_languages[i]);
+        SendMessageA(h, CB_ADDSTRING, 0, (LPARAM) NFSHSSaveEditor_languages[i]);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    CreateWindowA("STATIC", "Money:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA("EDIT", NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, TEXT_WIDTH, 20, hWnd, (HMENU) MONEY_TXT, NULL, NULL);
+    CreateWindowExA(0, WC_STATICA, "Money:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 50, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_EDITA, NULL, WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 100, y, 250, 20, hWnd, (HMENU) (INT_PTR) MONEY_TXT, NULL, NULL);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    char buf[MAX_BUF_SIZE];
-    CreateWindowA("STATIC", "Car slot:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) OWNED_CAR_SLOT_COMBO, NULL, NULL);
+    char buf[MAX_BUF_SIZE] = {0};
+
+    CreateWindowExA(0, WC_STATICA, "Car slot:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_COMBOBOXA, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 250, 200, hWnd, (HMENU) (INT_PTR) OWNED_CAR_SLOT_COMBO, NULL, NULL);
     for(size_t i = 0; i < OWNED_CAR_SLOT_COUNT; i++) {
         snprintf(buf, sizeof(buf), "%d", (int) i);
-        SendMessage(h, CB_ADDSTRING, 0, (LPARAM) buf);
+        SendMessageA(h, CB_ADDSTRING, 0, (LPARAM) buf);
     }
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    CreateWindowA("STATIC", "Model:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) OWNED_CAR_MODEL_COMBO, NULL, NULL);
-    SendMessage(h, CB_ADDSTRING, 0, (LPARAM) "None");
+    CreateWindowExA(0, WC_STATICA, "Model:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_COMBOBOXA, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 250, 200, hWnd, (HMENU) (INT_PTR) OWNED_CAR_MODEL_COMBO, NULL, NULL);
+    SendMessageA(h, CB_ADDSTRING, 0, (LPARAM) "None");
     for(size_t i = 0; i < ARRAY_SIZE(NFSHSSaveEditor_models); i++)
-       if(NFSHSSaveEditor_models[i]) SendMessage(h, CB_ADDSTRING, 0, (LPARAM) NFSHSSaveEditor_models[i]);
+        SendMessageA(h, CB_ADDSTRING, 0, (LPARAM) NFSHSSaveEditor_models[i]);
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    CreateWindowA("STATIC", "Upgrade:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) OWNED_CAR_UPGRADE_COMBO, NULL, NULL);
+    CreateWindowExA(0, WC_STATICA, "Upgrade:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_COMBOBOXA, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 250, 200, hWnd, (HMENU) (INT_PTR) OWNED_CAR_UPGRADE_COMBO, NULL, NULL);
     for(size_t i = 0; i < ARRAY_SIZE(NFSHSSaveEditor_upgrades); i++) {
         snprintf(buf, sizeof(buf), "%d", (int) i);
-        SendMessage(h, CB_ADDSTRING, 0, (LPARAM) buf);
+        SendMessageA(h, CB_ADDSTRING, 0, (LPARAM) buf);
     }
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    CreateWindowA("STATIC", "Color:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, (HMENU) 0, NULL, NULL);
-    h = CreateWindowA(WC_COMBOBOX, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, TEXT_WIDTH, 200, hWnd, (HMENU) OWNED_CAR_COLOR_COMBO, NULL, NULL);
+    CreateWindowExA(0, WC_STATICA, "Color:", WS_VISIBLE | WS_CHILD | SS_LEFT, 10, y, 80, 20, hWnd, NULL, NULL, NULL);
+    h = CreateWindowExA(0, WC_COMBOBOXA, NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST, 100, y, 250, 200, hWnd, (HMENU) (INT_PTR) OWNED_CAR_COLOR_COMBO, NULL, NULL);
     for(size_t i = 0; i < OWNED_CAR_COLOR_COUNT; i++) {
         snprintf(buf, sizeof(buf), "%d", (int) i);
-        SendMessage(h, CB_ADDSTRING, 0, (LPARAM) buf);
+        SendMessageA(h, CB_ADDSTRING, 0, (LPARAM) buf);
     }
     EnableWindow(h, FALSE);
     y += WND_Y_POS;
 
-    h = CreateWindowA("BUTTON", "All cars", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10, y, 100, 20, hWnd, (HMENU) ALL_CARS_BTN, NULL, NULL);
+    h = CreateWindowExA(0, WC_BUTTONA, "All cars", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10, y, 100, 20, hWnd, (HMENU) (INT_PTR) ALL_CARS_BTN, NULL, NULL);
     EnableWindow(h, FALSE);
 
-    h = CreateWindowA("BUTTON", "All tracks", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 130, y, 100, 20, hWnd, (HMENU) ALL_TRACKS_BTN, NULL, NULL);
+    h = CreateWindowExA(0, WC_BUTTONA, "All tracks", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 130, y, 100, 20, hWnd, (HMENU) (INT_PTR) ALL_TRACKS_BTN, NULL, NULL);
     EnableWindow(h, FALSE);
 
-    h = CreateWindowA("BUTTON", "Gold trophies", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 250, y, 100, 20, hWnd, (HMENU) GOLD_TROPHIES_BTN, NULL, NULL);
+    h = CreateWindowExA(0, WC_BUTTONA, "Gold trophies", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 250, y, 100, 20, hWnd, (HMENU) (INT_PTR) GOLD_TROPHIES_BTN, NULL, NULL);
     EnableWindow(h, FALSE);
 }
 
 void ResetGui(HWND hWnd) {
-    SendMessage(GetDlgItem(hWnd, TOOLBAR), TB_ENABLEBUTTON, (WPARAM) WRITE_BTN, MAKELONG(FALSE, 0));
+    HWND h = GetDlgItem(hWnd, TOOLBAR);
+    SendMessageA(h, TB_ENABLEBUTTON, (WPARAM) WRITE_BTN, MAKELONG(FALSE, 0));
 
-    HWND h = GetDlgItem(hWnd, PATH_TXT);
+    h = GetDlgItem(hWnd, PATH_TXT);
     SetWindowTextA(h, "");
     EnableWindow(h, FALSE);
 
@@ -144,7 +152,7 @@ void ResetGui(HWND hWnd) {
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, SAVE_COMBO);
-    SendMessage(h, CB_RESETCONTENT, 0, 0);
+    SendMessageA(h, CB_RESETCONTENT, 0, 0);
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, SERIAL_TXT);
@@ -156,7 +164,7 @@ void ResetGui(HWND hWnd) {
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, LANGUAGE_COMBO);
-    SendMessage(h, CB_SETCURSEL, (WPARAM) -1, 0);
+    SendMessageA(h, CB_SETCURSEL, -1, 0);
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, MONEY_TXT);
@@ -164,19 +172,19 @@ void ResetGui(HWND hWnd) {
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, OWNED_CAR_SLOT_COMBO);
-    SendMessage(h, CB_SETCURSEL, (WPARAM) -1, 0);
+    SendMessageA(h, CB_SETCURSEL, -1, 0);
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, OWNED_CAR_MODEL_COMBO);
-    SendMessage(h, CB_SETCURSEL, (WPARAM) -1, 0);
+    SendMessageA(h, CB_SETCURSEL, -1, 0);
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, OWNED_CAR_UPGRADE_COMBO);
-    SendMessage(h, CB_SETCURSEL, (WPARAM) -1, 0);
+    SendMessageA(h, CB_SETCURSEL, -1, 0);
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, OWNED_CAR_COLOR_COMBO);
-    SendMessage(h, CB_SETCURSEL, (WPARAM) -1, 0);
+    SendMessageA(h, CB_SETCURSEL, -1, 0);
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, ALL_CARS_BTN);
@@ -207,10 +215,10 @@ void UpdateGui(HWND hWnd, NFSHSSaveEditor* editor, const BOOL upsavedata, const 
 
         h = GetDlgItem(hWnd, LANGUAGE_COMBO);
         EnableWindow(h, TRUE);
-        SendMessage(h, CB_SETCURSEL, 0, 0);
+        SendMessageA(h, CB_SETCURSEL, 0, 0);
         if(editor->saves[saveidx].language) {
-            LRESULT lanidx = SendMessage(h, CB_FINDSTRINGEXACT, -1, (LPARAM) editor->saves[saveidx].language);
-            SendMessage(h, CB_SETCURSEL, (WPARAM) lanidx, 0);
+            LRESULT lanidx = SendMessageA(h, CB_FINDSTRINGEXACT, -1, (LPARAM) editor->saves[saveidx].language);
+            SendMessageA(h, CB_SETCURSEL, (WPARAM) lanidx, 0);
         }
 
         h = GetDlgItem(hWnd, MONEY_TXT);
@@ -221,35 +229,36 @@ void UpdateGui(HWND hWnd, NFSHSSaveEditor* editor, const BOOL upsavedata, const 
     if(upcardata) {
         HWND h = GetDlgItem(hWnd, OWNED_CAR_MODEL_COMBO);
         EnableWindow(h, TRUE);
-        SendMessage(h, CB_SETCURSEL, 0, 0);
+        SendMessageA(h, CB_SETCURSEL, 0, 0);
         if(editor->saves[saveidx].ownedcars[carslotidx].model) {
-            LRESULT modidx = SendMessage(h, CB_FINDSTRINGEXACT, -1, (LPARAM) editor->saves[saveidx].ownedcars[carslotidx].model);
-            SendMessage(h, CB_SETCURSEL, (WPARAM) modidx, 0);
+            LRESULT modidx = SendMessageA(h, CB_FINDSTRINGEXACT, -1, (LPARAM) editor->saves[saveidx].ownedcars[carslotidx].model);
+            SendMessageA(h, CB_SETCURSEL, (WPARAM) modidx, 0);
         }
 
         h = GetDlgItem(hWnd, OWNED_CAR_UPGRADE_COMBO);
         EnableWindow(h, TRUE);
-        SendMessage(h, CB_SETCURSEL, (WPARAM) editor->saves[saveidx].ownedcars[carslotidx].upgrade, 0);
+        SendMessageA(h, CB_SETCURSEL, (WPARAM) editor->saves[saveidx].ownedcars[carslotidx].upgrade, 0);
 
         h = GetDlgItem(hWnd, OWNED_CAR_COLOR_COMBO);
         EnableWindow(h, TRUE);
-        SendMessage(h, CB_SETCURSEL, (WPARAM) editor->saves[saveidx].ownedcars[carslotidx].color, 0);
+        SendMessageA(h, CB_SETCURSEL, (WPARAM) editor->saves[saveidx].ownedcars[carslotidx].color, 0);
     }
 }
 
 void PrintSave(HWND hWnd, NFSHSSaveEditor* editor, const char* path) {
-    NFSHSSaveEditor_init(editor, path);
+    NFSHSSaveEditor_init(editor, (const char*) path);
 
     if(editor->savecount == 0) {
         NFSHSSaveEditor_clear(editor);
-        MessageBoxA(hWnd, "No NFSHS save found.", "Error", MB_OK | MB_ICONERROR);
+        MessageBoxA(hWnd, "No NFSHS save found", "Error", MB_OK | MB_ICONERROR);
         ResetGui(hWnd);
         return;
     }
 
-    SendMessage(GetDlgItem(hWnd, TOOLBAR), TB_ENABLEBUTTON, (WPARAM) WRITE_BTN, MAKELONG(TRUE, 0));
+    HWND h = GetDlgItem(hWnd, TOOLBAR);
+    SendMessageA(h, TB_ENABLEBUTTON, (WPARAM) WRITE_BTN, MAKELONG(TRUE, 0));
 
-    HWND h = GetDlgItem(hWnd, PATH_TXT);
+    h = GetDlgItem(hWnd, PATH_TXT);
     SetWindowTextA(h, "");
     if(editor->path) {
         EnableWindow(h, TRUE);
@@ -263,19 +272,20 @@ void PrintSave(HWND hWnd, NFSHSSaveEditor* editor, const char* path) {
         SetWindowTextA(h, editor->format);
     }
 
-    char savebuf[MAX_BUF_SIZE];
+    char buf[MAX_BUF_SIZE] = {0};
+
     h = GetDlgItem(hWnd, SAVE_COMBO);
     EnableWindow(h, TRUE);
-    SendMessage(h, CB_RESETCONTENT, 0, 0);
+    SendMessageA(h, CB_RESETCONTENT, 0, 0);
     for(size_t i = 0; i < editor->savecount; i++) {
-        snprintf(savebuf, sizeof(savebuf), "%d", (int) i);
-        SendMessage(h, CB_ADDSTRING, 0, (LPARAM) savebuf);
+        snprintf(buf, sizeof(buf), "%d", (int) i);
+        SendMessageA(h, CB_ADDSTRING, 0, (LPARAM) buf);
     }
-    SendMessage(h, CB_SETCURSEL, 0, 0);
+    SendMessageA(h, CB_SETCURSEL, 0, 0);
 
     h = GetDlgItem(hWnd, OWNED_CAR_SLOT_COMBO);
     EnableWindow(h, TRUE);
-    SendMessage(h, CB_SETCURSEL, 0, 0);
+    SendMessageA(h, CB_SETCURSEL, 0, 0);
 
     h = GetDlgItem(hWnd, ALL_CARS_BTN);
     EnableWindow(h, TRUE);
@@ -290,23 +300,24 @@ void PrintSave(HWND hWnd, NFSHSSaveEditor* editor, const char* path) {
 }
 
 void OpenSave(HWND hWnd, NFSHSSaveEditor* editor) {
-    OPENFILENAME ofn = {0};
-    ofn.lStructSize = sizeof(OPENFILENAME);
+    OPENFILENAMEA ofn = {0};
+    ofn.lStructSize = sizeof(ofn);
     ofn.hwndOwner = hWnd;
     ofn.lpstrFile = path;
     ofn.nMaxFile = sizeof(path);
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-    if(GetOpenFileNameA(&ofn)) PrintSave(hWnd, editor, path);
+    if(GetOpenFileNameA(&ofn))
+        PrintSave(hWnd, editor, (const char*) path);
 }
 
 void WriteSave(HWND hWnd, NFSHSSaveEditor* editor) {
     const char* p = strrchr(path, '\\');
 
-    char newpath[MAX_PATH];
+    char newpath[MAX_PATH] = {0};
     strcpy(newpath, p && p[1] ? p + 1 : path);
 
-    OPENFILENAME ofn = {0};
-    ofn.lStructSize = sizeof(OPENFILENAME);
+    OPENFILENAMEA ofn = {0};
+    ofn.lStructSize = sizeof(ofn);
     ofn.hwndOwner = hWnd;
     ofn.lpstrFile = newpath;
     ofn.nMaxFile = sizeof(newpath);
@@ -314,9 +325,9 @@ void WriteSave(HWND hWnd, NFSHSSaveEditor* editor) {
     if(!GetSaveFileNameA(&ofn)) return;
 
     if(NFSHSSaveEditor_update(editor, (const char*) newpath))
-        MessageBoxA(hWnd, "Save(s) written.", "Info", MB_OK | MB_ICONINFORMATION);
+        MessageBoxA(hWnd, "Save(s) written", "Info", MB_OK | MB_ICONINFORMATION);
     else
-        MessageBoxA(hWnd, "Unable to write save(s) correctly.", "Error", MB_OK | MB_ICONERROR);
+        MessageBoxA(hWnd, "Unable to write save(s) correctly", "Error", MB_OK | MB_ICONERROR);
 }
 
 void UpdateSave(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
@@ -325,23 +336,22 @@ void UpdateSave(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
             LRESULT lanidx = SendDlgItemMessageA(hWnd, LANGUAGE_COMBO, CB_GETCURSEL, 0, 0);
 
-            char lan[MAX_BUF_SIZE];
-            SendDlgItemMessageA(hWnd, LANGUAGE_COMBO, CB_GETLBTEXT, (WPARAM) lanidx, (LPARAM) lan);
-
-            NFSHSSaveEditor_updatelang(editor, saveidx, lan);
+            char buf[MAX_BUF_SIZE] = {0};
+            SendDlgItemMessageA(hWnd, LANGUAGE_COMBO, CB_GETLBTEXT, (WPARAM) lanidx, (LPARAM) buf);
+            NFSHSSaveEditor_updatelang(editor, (size_t) saveidx, (const char*) buf);
         }
         break;
 
         case MONEY_TXT: {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
 
-            char moneybuf[MAX_BUF_SIZE];
-            GetDlgItemTextA(hWnd, MONEY_TXT, moneybuf, sizeof(moneybuf));
+            char buf[MAX_BUF_SIZE] = {0};
+            GetDlgItemTextA(hWnd, MONEY_TXT, buf, sizeof(buf));
             char* end = NULL;
-            int32_t money = strtol(moneybuf, &end, 10);
+            int32_t money = strtol(buf, &end, 10);
 
-            if(end != moneybuf && *end == '\0')
-                NFSHSSaveEditor_updatemoney(editor, saveidx, money);
+            if(end != buf && *end == '\0')
+                NFSHSSaveEditor_updatemoney(editor, (size_t) saveidx, money);
         }
         break;
 
@@ -354,31 +364,27 @@ void UpdateSave(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             LRESULT upgrade = SendDlgItemMessageA(hWnd, OWNED_CAR_UPGRADE_COMBO, CB_GETCURSEL, 0, 0);
             LRESULT color = SendDlgItemMessageA(hWnd, OWNED_CAR_COLOR_COMBO, CB_GETCURSEL, 0, 0);
 
-            char model[MAX_BUF_SIZE];
-            SendDlgItemMessageA(hWnd, OWNED_CAR_MODEL_COMBO, CB_GETLBTEXT, (WPARAM) modidx, (LPARAM) model);
-
-            NFSHSSaveEditor_updateownedcar(editor, saveidx, carslotidx, (const char*) model, upgrade, color);
+            char buf[MAX_BUF_SIZE] = {0};
+            SendDlgItemMessageA(hWnd, OWNED_CAR_MODEL_COMBO, CB_GETLBTEXT, (WPARAM) modidx, (LPARAM) buf);
+            NFSHSSaveEditor_updateownedcar(editor, (size_t) saveidx, (size_t) carslotidx, (const char*) buf, (uint8_t) upgrade, (uint8_t) color);
         }
         break;
 
         case ALL_CARS_BTN: {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
-            NFSHSSaveEditor_unlockcars(editor, saveidx);
-
+            NFSHSSaveEditor_unlockcars(editor, (size_t) saveidx);
         }
         break;
 
         case ALL_TRACKS_BTN: {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
-            NFSHSSaveEditor_unlocktracks(editor, saveidx);
-
+            NFSHSSaveEditor_unlocktracks(editor, (size_t) saveidx);
         }
         break;
 
         case GOLD_TROPHIES_BTN: {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
-            NFSHSSaveEditor_setgoldtrophies(editor, saveidx);
-
+            NFSHSSaveEditor_setgoldtrophies(editor, (size_t) saveidx);
         }
         break;
     }
@@ -398,7 +404,7 @@ void ProcessCmd(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             if(HIWORD(wParam) == CBN_SELCHANGE) {
                 LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
                 LRESULT carslotidx = SendDlgItemMessageA(hWnd, OWNED_CAR_SLOT_COMBO, CB_GETCURSEL, 0, 0);
-                UpdateGui(hWnd, editor, TRUE, TRUE, saveidx, carslotidx);
+                UpdateGui(hWnd, editor, TRUE, TRUE, (size_t) saveidx, (size_t) carslotidx);
             }
             break;
 
@@ -417,28 +423,28 @@ void ProcessCmd(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             if(HIWORD(wParam) == CBN_SELCHANGE) {
                 LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
                 LRESULT carslotidx = SendDlgItemMessageA(hWnd, OWNED_CAR_SLOT_COMBO, CB_GETCURSEL, 0, 0);
-                UpdateGui(hWnd, editor, FALSE, TRUE, saveidx, carslotidx);
+                UpdateGui(hWnd, editor, FALSE, TRUE, (size_t) saveidx, (size_t) carslotidx);
             }
             break;
 
         case ALL_CARS_BTN:
             if(HIWORD(wParam) == BN_CLICKED) {
                 UpdateSave(hWnd, wParam, editor);
-                MessageBoxA(hWnd, "All cars unlocked.", "Info", MB_OK | MB_ICONINFORMATION);
+                MessageBoxA(hWnd, "All cars unlocked", "Info", MB_OK | MB_ICONINFORMATION);
             }
             break;
 
         case ALL_TRACKS_BTN:
             if(HIWORD(wParam) == BN_CLICKED) {
                 UpdateSave(hWnd, wParam, editor);
-                MessageBoxA(hWnd, "All tracks unlocked.", "Info", MB_OK | MB_ICONINFORMATION);
+                MessageBoxA(hWnd, "All tracks unlocked", "Info", MB_OK | MB_ICONINFORMATION);
             }
             break;
 
         case GOLD_TROPHIES_BTN:
             if(HIWORD(wParam) == BN_CLICKED) {
                 UpdateSave(hWnd, wParam, editor);
-                MessageBoxA(hWnd, "Gold trophies unlocked.", "Info", MB_OK | MB_ICONINFORMATION);
+                MessageBoxA(hWnd, "Gold trophies unlocked", "Info", MB_OK | MB_ICONINFORMATION);
             }
             break;
     }
@@ -466,7 +472,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             break;
 
         default:
-            res = DefWindowProc(hWnd, msg, wParam, lParam);
+            res = DefWindowProcA(hWnd, msg, wParam, lParam);
     }
 
     return res;
@@ -484,5 +490,5 @@ BOOL RegisterMainClass(HINSTANCE hInstance) {
 }
 
 HWND CreateMainWindow(HINSTANCE hInstance) {
-    return CreateWindowA(WND_CLASS_NAME, WND_TITLE, WS_VISIBLE | (WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME), CW_USEDEFAULT, CW_USEDEFAULT, WND_WIDTH, WND_HEIGHT, NULL, NULL, hInstance, NULL);
+    return CreateWindowExA(0, WND_CLASS_NAME, WND_TITLE, WS_VISIBLE | (WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME), CW_USEDEFAULT, CW_USEDEFAULT, WND_WIDTH, WND_HEIGHT, NULL, NULL, hInstance, NULL);
 }

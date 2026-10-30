@@ -1,7 +1,10 @@
 #include "NFSHSSaveEditorForm.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	InitCommonControls();
+    INITCOMMONCONTROLSEX icc = {0};
+    icc.dwSize = sizeof(icc);
+    icc.dwICC = ICC_BAR_CLASSES;
+    InitCommonControlsEx(&icc);
     if(!RegisterMainClass(hInstance) || !CreateMainWindow(hInstance)) return 1;
 
     MSG msg;
@@ -10,5 +13,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         DispatchMessage(&msg);
     }
 
-    return msg.wParam;
+    return 0;
 }
