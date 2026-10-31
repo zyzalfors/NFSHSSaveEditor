@@ -12,7 +12,7 @@
 #define WND_CLASS_NAME "NFSHSSaveEditor"
 #define WND_TITLE "NFSHS Save Editor"
 #define WND_WIDTH 380
-#define WND_HEIGHT 430
+#define WND_HEIGHT 460
 #define WND_Y_POS 30
 #define MAX_BUF_SIZE 50
 
@@ -33,6 +33,7 @@
 #define ALL_CARS_BTN 1014
 #define ALL_TRACKS_BTN 1015
 #define GOLD_TROPHIES_BTN 1016
+#define NO_CAR_RESTRICTION_BTN 1017
 
 char path[MAX_PATH] = {0};
 NFSHSSaveEditor editor = {0};
@@ -137,6 +138,10 @@ void InitGui(HWND hWnd) {
 
     h = CreateWindowExA(0, WC_BUTTONA, "Gold trophies", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 250, y, 100, 20, hWnd, (HMENU) (INT_PTR) GOLD_TROPHIES_BTN, NULL, NULL);
     EnableWindow(h, FALSE);
+    y += WND_Y_POS;
+
+    h = CreateWindowExA(0, WC_BUTTONA, "No car restriction", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10, y, 150, 20, hWnd, (HMENU) (INT_PTR) NO_CAR_RESTRICTION_BTN, NULL, NULL);
+    EnableWindow(h, FALSE);
 }
 
 void ResetGui(HWND hWnd) {
@@ -194,6 +199,9 @@ void ResetGui(HWND hWnd) {
     EnableWindow(h, FALSE);
 
     h = GetDlgItem(hWnd, GOLD_TROPHIES_BTN);
+    EnableWindow(h, FALSE);
+
+    h = GetDlgItem(hWnd, NO_CAR_RESTRICTION_BTN);
     EnableWindow(h, FALSE);
 }
 
@@ -296,6 +304,9 @@ void PrintSave(HWND hWnd, NFSHSSaveEditor* editor, const char* path) {
     h = GetDlgItem(hWnd, GOLD_TROPHIES_BTN);
     EnableWindow(h, TRUE);
 
+    h = GetDlgItem(hWnd, NO_CAR_RESTRICTION_BTN);
+    EnableWindow(h, TRUE);
+
     UpdateGui(hWnd, editor, TRUE, TRUE, 0, 0);
 }
 
@@ -387,6 +398,12 @@ void UpdateSave(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             NFSHSSaveEditor_setgoldtrophies(editor, (size_t) saveidx);
         }
         break;
+
+        case NO_CAR_RESTRICTION_BTN: {
+            LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
+            NFSHSSaveEditor_setnocarrestriction(editor, (size_t) saveidx);
+        }
+        break;
     }
 }
 
@@ -445,6 +462,13 @@ void ProcessCmd(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
             if(HIWORD(wParam) == BN_CLICKED) {
                 UpdateSave(hWnd, wParam, editor);
                 MessageBoxA(hWnd, "Gold trophies unlocked", "Info", MB_OK | MB_ICONINFORMATION);
+            }
+            break;
+
+        case NO_CAR_RESTRICTION_BTN:
+            if(HIWORD(wParam) == BN_CLICKED) {
+                UpdateSave(hWnd, wParam, editor);
+                MessageBoxA(hWnd, "No car restriction unlocked", "Info", MB_OK | MB_ICONINFORMATION);
             }
             break;
     }

@@ -23,6 +23,8 @@
 
 #define RAW_SAVE_SIZE 5292
 
+#define BIT_FLAGS_START 4
+
 #define FRONTEND_START 8
 #define FRONTEND_SIZE 1104
 
@@ -78,6 +80,7 @@ typedef struct {
     uint8_t unlockallcars;
     uint8_t unlockalltracks;
     uint8_t setgoldtrophies;
+    uint8_t nocarrestriction;
 } NFSHSSave;
 
 typedef struct {
@@ -93,6 +96,7 @@ const char* NFSHSSaveEditor_serials[] = {"SLUS-00826", "SLES-01876", "SLES-01788
 const char* NFSHSSaveEditor_languages[] = {"EN/JA", "DE", "FR", "ES", "IT", "SV"};
 const char* NFSHSSaveEditor_models[] = {"Mercedes-Benz SLK", "BMW Z3", "Holden VT/Nissan Skyline", "Ford Falcon", "Chevrolet Camaro", "Pontiac Firebird", "Aston Martin DB7", "Jaguar XKR", "BMW M5", "Chevrolet Corvette", "Ferrari 550", "Porsche 911", "Ferrari F50", "Lamborghini Diablo", "Mercedes-Benz CLK GTR", "McLaren F1 GTR", "Porsche 911 Race", "Holden VT/Nissan Skyline Race", "Chevrolet Corvette Race", "NFS Phantom", "NFS Titan", "NFS Titan?", "Chevrolet Caprice Police", "Holden VT Police", "BMW M5 Police", "Chevrolet Corvette Police", "Porsche 911 Police", "Lamborghini Diablo Police", "NFS Jailbird", "Audi A4", "BMW 530i", "Mercedes-Benz 500SL", "Volvo 850", "GMC B-Series", "Toyota Land Cruiser", "Mazda Miata", "Mercedes-Benz Unimog Army Truck", "Jeep Comanche", "Chevrolet G30", "Chevrolet G30 Dirty", "NFS Van", "Jeep Cherokee", "Chevrolet C20", "Chevrolet C20", "NFS Pickup Truck", "Plymouth Barracuda", "Chevrolet Caprice Taxi", "Prevost H3", "Mercedes-Benz Unimog Log Truck", "MCI Classic"};
 const uint8_t NFSHSSaveEditor_upgrades[] = {0x00, 0x01, 0x03, 0x07};
+const uint8_t NFSHSSaveEditor_nocarrestriction[] = {0x21, 0x60};
 
 const uint8_t NFSHSSaveEditor_table1[256] = {
     0x00, 0xc1, 0x81, 0x40, 0x01, 0xc0, 0x80, 0x41, 0x01, 0xc0, 0x80, 0x41, 0x00, 0xc1, 0x81, 0x40,
@@ -209,8 +213,6 @@ void NFSHSSaveEditor_parseinfo(NFSHSSaveEditor* editor) {
         editor->saves[i].language = lanidx < ARRAY_SIZE(NFSHSSaveEditor_languages) ? NFSHSSaveEditor_languages[lanidx] : NFSHSSaveEditor_languages[0];
 
         memcpy(editor->saves[i].name, editor->data + editor->saves[i].start + PLAYER_NAME_START, PLAYER_NAME_SIZE);
-        editor->saves[i].name[PLAYER_NAME_SIZE] = '\0';
-
         editor->saves[i].money = NFSHSSaveEditor_toint(editor->data + editor->saves[i].start + TOURNAMENT_INFO_START);
 
         const size_t pos = editor->saves[i].start + CAR_INFO_START;
@@ -221,7 +223,7 @@ void NFSHSSaveEditor_parseinfo(NFSHSSaveEditor* editor) {
             if(modidx < ARRAY_SIZE(NFSHSSaveEditor_models)) {
                 car.model = NFSHSSaveEditor_models[modidx];
 
-                const int upgidx = NFSHSSaveEditor_findbyte(editor->data[pos + OWNED_CAR_SLOT_SIZE * j + 1], NFSHSSaveEditor_upgrades, ARRAY_SIZE(NFSHSSaveEditor_upgrades));
+                const int upgidx = NFSHSSaveEditor_findbyte(editor->data[pos + OWNED_CAR_SLOT_SIZE * j + 1], NFSHSSaveEditor_upgrades, sizeof(NFSHSSaveEditor_upgrades));
                 if(upgidx > -1) car.upgrade = (uint8_t) upgidx;
 
                 const uint8_t colidx = editor->data[pos + OWNED_CAR_SLOT_SIZE * j + 2];
@@ -244,7 +246,7 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
 
             if(editor->saves) {
                 editor->format = "RAW";
-                NFSHSSave save;
+                NFSHSSave save = {0};
                 save.start = 0;
                 save.serial = NULL;
                 editor->saves[0] = save;
@@ -262,7 +264,7 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
 
             if(editor->saves) {
                 editor->format = "SC";
-                NFSHSSave save;
+                NFSHSSave save = {0};
                 save.start = SC_HEADER_SIZE;
                 save.serial = NULL;
                 editor->saves[0] = save;
@@ -276,8 +278,7 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
 
     if(editor->size >= PSV_HEADER_SIZE + SC_HEADER_SIZE + RAW_SAVE_SIZE) {
         if(memcmp(editor->data, PSV_MAGIC, sizeof(PSV_MAGIC) - 1) == 0) {
-            char serial[SERIAL_SIZE + 1];
-            serial[SERIAL_SIZE] = '\0';
+            char serial[SERIAL_SIZE + 1] = {0};
 
             memcpy(serial, editor->data + 102, sizeof(serial) - 1);
             const int seridx = NFSHSSaveEditor_findstr(serial, NFSHSSaveEditor_serials, ARRAY_SIZE(NFSHSSaveEditor_serials));
@@ -287,7 +288,7 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
 
                 if(editor->saves) {
                     editor->format = "PSV";
-                    NFSHSSave save;
+                    NFSHSSave save = {0};
                     save.start = PSV_HEADER_SIZE + SC_HEADER_SIZE;
                     save.serial = NFSHSSaveEditor_serials[seridx];
                     editor->saves[0] = save;
@@ -313,12 +314,11 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
     }
 
     if(format) {
-        long starts[MC_BLOCK_COUNT];
-        int serials[MC_BLOCK_COUNT];
+        long starts[MC_BLOCK_COUNT] = {0};
+        int serials[MC_BLOCK_COUNT] = {0};
 
         size_t n = 0;
-        char serial[SERIAL_SIZE + 1];
-        serial[SERIAL_SIZE] = '\0';
+        char serial[SERIAL_SIZE + 1] = {0};
 
         for(size_t i = 1; i < MC_BLOCK_COUNT; i++) {
             starts[i] = -1;
@@ -341,7 +341,7 @@ void NFSHSSaveEditor_parse(NFSHSSaveEditor* editor) {
                 editor->format = format;
 
                 size_t j = 0;
-                NFSHSSave save;
+                NFSHSSave save = {0};
 
                 for(size_t i = 1; i < MC_BLOCK_COUNT; i++) {
                     if(starts[i] > -1 && serials[i] > -1) {
@@ -450,7 +450,7 @@ void NFSHSSaveEditor_updateownedcar(NFSHSSaveEditor* editor, const size_t saveid
     if(saveidx >= editor->savecount || carslotidx >= OWNED_CAR_SLOT_COUNT) return;
 
     const int modidx = NFSHSSaveEditor_findstr(model, NFSHSSaveEditor_models, ARRAY_SIZE(NFSHSSaveEditor_models));
-    const uint8_t upgidx = upgrade < ARRAY_SIZE(NFSHSSaveEditor_upgrades) ? upgrade : 0;
+    const uint8_t upgidx = upgrade < sizeof(NFSHSSaveEditor_upgrades) ? upgrade : 0;
     const uint8_t colidx = color < OWNED_CAR_COLOR_COUNT ? color : 0;
 
     editor->saves[saveidx].ownedcars[carslotidx].model = modidx > -1 ? NFSHSSaveEditor_models[modidx] : NULL;
@@ -473,6 +473,11 @@ void NFSHSSaveEditor_setgoldtrophies(NFSHSSaveEditor* editor, const size_t savei
     editor->saves[saveidx].setgoldtrophies = 1;
 }
 
+void NFSHSSaveEditor_setnocarrestriction(NFSHSSaveEditor* editor, const size_t saveidx) {
+    if(saveidx >= editor->savecount) return;
+    editor->saves[saveidx].nocarrestriction = 1;
+}
+
 int NFSHSSaveEditor_update(NFSHSSaveEditor* editor, const char* path) {
     if(!editor || !editor->data || !editor->path || editor->savecount == 0) return 0;
     uint8_t buf[sizeof(uint32_t)];
@@ -486,7 +491,7 @@ int NFSHSSaveEditor_update(NFSHSSaveEditor* editor, const char* path) {
 
         for(size_t j = 0; j < OWNED_CAR_SLOT_COUNT; j++) {
             const int modidx = NFSHSSaveEditor_findstr(editor->saves[i].ownedcars[j].model, NFSHSSaveEditor_models, ARRAY_SIZE(NFSHSSaveEditor_models));
-            const uint8_t upgidx = editor->saves[i].ownedcars[j].upgrade < ARRAY_SIZE(NFSHSSaveEditor_upgrades) ? editor->saves[i].ownedcars[j].upgrade : 0;
+            const uint8_t upgidx = editor->saves[i].ownedcars[j].upgrade < sizeof(NFSHSSaveEditor_upgrades) ? editor->saves[i].ownedcars[j].upgrade : 0;
             const uint8_t colidx = editor->saves[i].ownedcars[j].color < OWNED_CAR_COLOR_COUNT ? editor->saves[i].ownedcars[j].color : 0;
 
             editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j] = modidx > -1 ? (uint8_t) modidx : EMPTY_CAR_SLOT_FLAG;
@@ -504,6 +509,9 @@ int NFSHSSaveEditor_update(NFSHSSaveEditor* editor, const char* path) {
 
         if(editor->saves[i].setgoldtrophies)
             memset(editor->data + editor->saves[i].start + TROPHIES_START, 0x01, TROPHIES_SIZE);
+
+        if(editor->saves[i].nocarrestriction)
+            memcpy(editor->data + editor->saves[i].start + BIT_FLAGS_START, NFSHSSaveEditor_nocarrestriction, sizeof(NFSHSSaveEditor_nocarrestriction));
     }
 
     NFSHSSaveEditor_fixcrc16(editor);
