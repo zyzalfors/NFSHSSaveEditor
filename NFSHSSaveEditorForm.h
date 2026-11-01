@@ -383,25 +383,25 @@ void UpdateSave(HWND hWnd, WPARAM wParam, NFSHSSaveEditor* editor) {
 
         case ALL_CARS_BTN: {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
-            NFSHSSaveEditor_unlockcars(editor, (size_t) saveidx);
+            NFSHSSaveEditor_allcars(editor, (size_t) saveidx);
         }
         break;
 
         case ALL_TRACKS_BTN: {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
-            NFSHSSaveEditor_unlocktracks(editor, (size_t) saveidx);
+            NFSHSSaveEditor_alltracks(editor, (size_t) saveidx);
         }
         break;
 
         case GOLD_TROPHIES_BTN: {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
-            NFSHSSaveEditor_setgoldtrophies(editor, (size_t) saveidx);
+            NFSHSSaveEditor_goldtrophies(editor, (size_t) saveidx);
         }
         break;
 
         case NO_CAR_RESTRICTION_BTN: {
             LRESULT saveidx = SendDlgItemMessageA(hWnd, SAVE_COMBO, CB_GETCURSEL, 0, 0);
-            NFSHSSaveEditor_setnocarrestriction(editor, (size_t) saveidx);
+            NFSHSSaveEditor_nocarrestriction(editor, (size_t) saveidx);
         }
         break;
     }

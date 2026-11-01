@@ -77,9 +77,9 @@ typedef struct {
     char name[PLAYER_NAME_SIZE + 1];
     int32_t money;
     NFSHSOwnedCar ownedcars[OWNED_CAR_SLOT_COUNT];
-    uint8_t unlockallcars;
-    uint8_t unlockalltracks;
-    uint8_t setgoldtrophies;
+    uint8_t allcars;
+    uint8_t alltracks;
+    uint8_t goldtrophies;
     uint8_t nocarrestriction;
 } NFSHSSave;
 
@@ -96,7 +96,7 @@ const char* NFSHSSaveEditor_serials[] = {"SLUS-00826", "SLES-01876", "SLES-01788
 const char* NFSHSSaveEditor_languages[] = {"EN/JA", "DE", "FR", "ES", "IT", "SV"};
 const char* NFSHSSaveEditor_models[] = {"Mercedes-Benz SLK", "BMW Z3", "Holden VT/Nissan Skyline", "Ford Falcon", "Chevrolet Camaro", "Pontiac Firebird", "Aston Martin DB7", "Jaguar XKR", "BMW M5", "Chevrolet Corvette", "Ferrari 550", "Porsche 911", "Ferrari F50", "Lamborghini Diablo", "Mercedes-Benz CLK GTR", "McLaren F1 GTR", "Porsche 911 Race", "Holden VT/Nissan Skyline Race", "Chevrolet Corvette Race", "NFS Phantom", "NFS Titan", "NFS Titan?", "Chevrolet Caprice Police", "Holden VT Police", "BMW M5 Police", "Chevrolet Corvette Police", "Porsche 911 Police", "Lamborghini Diablo Police", "NFS Jailbird", "Audi A4", "BMW 530i", "Mercedes-Benz 500SL", "Volvo 850", "GMC B-Series", "Toyota Land Cruiser", "Mazda Miata", "Mercedes-Benz Unimog Army Truck", "Jeep Comanche", "Chevrolet G30", "Chevrolet G30 Dirty", "NFS Van", "Jeep Cherokee", "Chevrolet C20", "Chevrolet C20", "NFS Pickup Truck", "Plymouth Barracuda", "Chevrolet Caprice Taxi", "Prevost H3", "Mercedes-Benz Unimog Log Truck", "MCI Classic"};
 const uint8_t NFSHSSaveEditor_upgrades[] = {0x00, 0x01, 0x03, 0x07};
-const uint8_t NFSHSSaveEditor_nocarrestriction[] = {0x21, 0x60};
+const uint8_t NFSHSSaveEditor_nocarrestrictiondata[] = {0x21, 0x60};
 
 const uint8_t NFSHSSaveEditor_table1[256] = {
     0x00, 0xc1, 0x81, 0x40, 0x01, 0xc0, 0x80, 0x41, 0x01, 0xc0, 0x80, 0x41, 0x00, 0xc1, 0x81, 0x40,
@@ -233,9 +233,10 @@ void NFSHSSaveEditor_parseinfo(NFSHSSaveEditor* editor) {
             editor->saves[i].ownedcars[j] = car;
         }
 
-        editor->saves[i].unlockallcars = 0;
-        editor->saves[i].unlockalltracks = 0;
-        editor->saves[i].setgoldtrophies = 0;
+        editor->saves[i].allcars = 0;
+        editor->saves[i].alltracks = 0;
+        editor->saves[i].goldtrophies = 0;
+        editor->saves[i].nocarrestriction = 0;
     }
 }
 
@@ -458,22 +459,22 @@ void NFSHSSaveEditor_updateownedcar(NFSHSSaveEditor* editor, const size_t saveid
     editor->saves[saveidx].ownedcars[carslotidx].color = modidx > -1 ? colidx : 0;
 }
 
-void NFSHSSaveEditor_unlockcars(NFSHSSaveEditor* editor, const size_t saveidx) {
+void NFSHSSaveEditor_allcars(NFSHSSaveEditor* editor, const size_t saveidx) {
     if(saveidx >= editor->savecount) return;
-    editor->saves[saveidx].unlockallcars = 1;
+    editor->saves[saveidx].allcars = 1;
 }
 
-void NFSHSSaveEditor_unlocktracks(NFSHSSaveEditor* editor, const size_t saveidx) {
+void NFSHSSaveEditor_alltracks(NFSHSSaveEditor* editor, const size_t saveidx) {
     if(saveidx >= editor->savecount) return;
-    editor->saves[saveidx].unlockalltracks = 1;
+    editor->saves[saveidx].alltracks = 1;
 }
 
-void NFSHSSaveEditor_setgoldtrophies(NFSHSSaveEditor* editor, const size_t saveidx) {
+void NFSHSSaveEditor_goldtrophies(NFSHSSaveEditor* editor, const size_t saveidx) {
     if(saveidx >= editor->savecount) return;
-    editor->saves[saveidx].setgoldtrophies = 1;
+    editor->saves[saveidx].goldtrophies = 1;
 }
 
-void NFSHSSaveEditor_setnocarrestriction(NFSHSSaveEditor* editor, const size_t saveidx) {
+void NFSHSSaveEditor_nocarrestriction(NFSHSSaveEditor* editor, const size_t saveidx) {
     if(saveidx >= editor->savecount) return;
     editor->saves[saveidx].nocarrestriction = 1;
 }
@@ -499,19 +500,19 @@ int NFSHSSaveEditor_update(NFSHSSaveEditor* editor, const char* path) {
             editor->data[editor->saves[i].start + CAR_INFO_START + OWNED_CAR_SLOT_SIZE * j + 2] = modidx > -1 ? colidx : 0;
         }
 
-        if(editor->saves[i].unlockallcars) {
+        if(editor->saves[i].allcars) {
             memset(editor->data + editor->saves[i].start + CAR_AVAILABILITY_START, 0x01, CAR_AVAILABILITY_SIZE);
             memset(editor->data + editor->saves[i].start + CAR_VISIBILITY_START, 0x01, CAR_VISIBILITY_SIZE);
         }
 
-        if(editor->saves[i].unlockalltracks)
+        if(editor->saves[i].alltracks)
             memset(editor->data + editor->saves[i].start + TRACK_INFO_START, 0x01, TRACK_INFO_SIZE);
 
-        if(editor->saves[i].setgoldtrophies)
+        if(editor->saves[i].goldtrophies)
             memset(editor->data + editor->saves[i].start + TROPHIES_START, 0x01, TROPHIES_SIZE);
 
         if(editor->saves[i].nocarrestriction)
-            memcpy(editor->data + editor->saves[i].start + BIT_FLAGS_START, NFSHSSaveEditor_nocarrestriction, sizeof(NFSHSSaveEditor_nocarrestriction));
+            memcpy(editor->data + editor->saves[i].start + BIT_FLAGS_START, NFSHSSaveEditor_nocarrestrictiondata, sizeof(NFSHSSaveEditor_nocarrestrictiondata));
     }
 
     NFSHSSaveEditor_fixcrc16(editor);
